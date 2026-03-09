@@ -1,0 +1,26 @@
+[project]
+name = "network-slicing-mas"
+version = "0.1.0"
+description = "Network Resource Management Based on Language Model Multi-Agent Systems"
+requires-python = ">=3.11"
+dependencies = [
+    "gymnasium>=1.0.0",
+    "numpy>=1.26.0",
+    "pandas>=2.2.0",
+    "matplotlib>=3.9.0",
+    "openai>=1.40.0",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+    "langgraph>=0.2.0",
+    "langchain-openai>=0.2.0",
+    "langchain-core>=0.3.0",
+    "tqdm>=4.67.3",
+    "scipy>=1.17.1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

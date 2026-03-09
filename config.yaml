@@ -1,0 +1,43 @@
+environment:
+    total_bandwidth_mhz: 100
+    max_users: 100
+    num_slices: 3
+    slice_names: ['eMBB', 'URLLC', 'mMTC']
+    # Poisson到达率 (平均用户数)
+    arrival_rates: [50, 30, 20]
+    # Burst场景: eMBB到达率翻倍的周期
+    burst_cycle: 50
+    burst_multiplier: 2.0
+    min_allocation: 0.05
+    # CQI均值回复模型参数 (离散Ornstein-Uhlenbeck / AR(1))
+    # 各切片的平均CQI: eMBB=9(中高), URLLC=10(良好), mMTC=7(中等)
+    cqi_means: [9, 10, 7]
+    cqi_reversion_rate: 0.15 # 均值回复速率 (越大回复越快)
+    cqi_noise_std: 1.2 # 高斯噪声标准差
+
+sla:
+    embb_throughput_mbps: 50
+    urllc_delay_ratio: 0.1
+    mMTC_access_rate: 0.95
+
+reward:
+    w_sla: 0.5
+    w_util: 0.3
+    w_violation: 0.2
+
+experiment:
+    num_cycles: 100
+    num_seeds: 2
+    seeds: [42, 123, 456, 789, 1024]
+    scenarios: ['steady', 'burst']
+
+llm:
+    temperature: 0
+    max_retries: 3
+    timeout_seconds: 30
+    max_negotiation_rounds: 3
+
+baseline:
+    fixed_ratio: [0.5, 0.3, 0.2]
+    threshold_sla: 0.8
+    threshold_transfer: 0.05
