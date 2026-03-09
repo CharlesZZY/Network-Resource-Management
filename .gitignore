@@ -4,5 +4,3 @@ __pycache__/
 *.pyc
 .venv/
 .mplcache/
-results/data/*.csv
-results/figures/*.png

@@ -6,6 +6,7 @@ from experiments.runner import load_config, run_experiment
 from src.agents.multi_agent_graph import MultiAgentPolicy
 from src.agents.single_agent import SingleAgentLLM
 from src.baselines.fixed_ratio import FixedRatioPolicy
+from src.baselines.ppo_policy import PPOPolicy
 from src.baselines.threshold import ThresholdPolicy
 
 
@@ -13,11 +14,12 @@ def run_exp1(config=None):
     config = config or load_config()
 
     methods = {
-        "M1-Fixed": lambda: FixedRatioPolicy(config["baseline"]["fixed_ratio"]),
-        "M2-Threshold": lambda: ThresholdPolicy(config),
-        "M4-SingleLLM": lambda: SingleAgentLLM(),
-        "M5-PA": lambda: MultiAgentPolicy(strategy="priority", max_rounds=3),
-        "M5-PC": lambda: MultiAgentPolicy(strategy="proportional", max_rounds=3),
+        # "M1-Fixed": lambda: FixedRatioPolicy(config["baseline"]["fixed_ratio"]),
+        # "M2-Threshold": lambda: ThresholdPolicy(config),
+        "M3-PPO": lambda: PPOPolicy(),
+        # "M4-SingleLLM": lambda: SingleAgentLLM(),
+        # "M5-PA": lambda: MultiAgentPolicy(strategy="priority", max_rounds=3),
+        # "M5-PC": lambda: MultiAgentPolicy(strategy="proportional", max_rounds=3),
     }
 
     all_episode_metrics = []

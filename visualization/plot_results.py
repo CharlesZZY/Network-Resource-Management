@@ -15,6 +15,7 @@ os.makedirs(FIGURES_DIR, exist_ok=True)
 METHOD_COLORS = {
     "M1-Fixed": "#7f8c8d",
     "M2-Threshold": "#3498db",
+    "M3-PPO": "#1abc9c",
     "M4-SingleLLM": "#e67e22",
     "M5-PA": "#e74c3c",
     "M5-PC": "#2ecc71",
@@ -237,10 +238,41 @@ def plot_exp2_performance_overview(df):
     print(f"  saved: {path}")
 
 
+# ===================== PPO 训练曲线 =====================
+
+def plot_ppo_training_curve(csv_path="results/data/ppo_training_curve.csv"):
+    """PPO training convergence curve."""
+    if not os.path.exists(csv_path):
+        return
+    df = pd.read_csv(csv_path)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(df["episode"], df["reward"], alpha=0.3, color="#3498db",
+            linewidth=0.8, label="Episode reward")
+
+    window = min(50, len(df))
+    smoothed = df["reward"].rolling(window, min_periods=1).mean()
+    ax.plot(df["episode"], smoothed, color="#e74c3c", linewidth=2,
+            label=f"Rolling mean (w={window})")
+
+    ax.set_xlabel("Episode")
+    ax.set_ylabel("Cumulative Reward")
+    ax.set_title("PPO Training Convergence Curve")
+    ax.legend()
+    ax.grid(alpha=0.3)
+    plt.tight_layout()
+    path = os.path.join(FIGURES_DIR, "ppo_training_curve.png")
+    fig.savefig(path, dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    print(f"  saved: {path}")
+
+
 # ===================== 入口 =====================
 
 def generate_all_plots():
     print("\n=== Generating plots ===")
+
+    plot_ppo_training_curve()
 
     if os.path.exists("results/data/exp1_episodes.csv"):
         df_ep1 = pd.read_csv("results/data/exp1_episodes.csv")
