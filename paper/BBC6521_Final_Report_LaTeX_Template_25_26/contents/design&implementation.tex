@@ -1,0 +1,163 @@
+\section*{Chapter 3: Design and Implementation}
+\phantomsection \setcounter{section}{3} \setcounter{subsection}{0}
+\addcontentsline{toc}{section}{\textit{Chapter 3: Design and Implementation}}
+
+This chapter presents the design of the proposed LLM multi-agent negotiation framework for 5G network slice resource management and describes its implementation. Section~3.1 outlines the overall system architecture and the guiding design principles. Section~3.2 details the two-tier scheduling framework that reconciles LLM inference latency with the real-time demands of radio resource management. Section~3.3 specifies the roles and internal logic of the individual agents. Section~3.4 defines the proposal--evaluation--negotiation protocol. Section~3.5 describes the Gymnasium-based simulation environment. Section~3.6 discusses the LangGraph-orchestrated workflow. Section~3.7 presents the baseline methods implemented for comparison.
+
+\subsection{System Overview and Architectural Principles}
+
+The proposed framework is organised into three loosely coupled layers, as illustrated in Figure~\ref{fig:sysarch}. The \emph{Agent Layer} defines the specialised agents and their configurations. The \emph{Collaboration Layer} implements inter-agent negotiation and conflict resolution. The \emph{Environment Layer} provides a standardised simulation interface that decouples the decision logic from the underlying simulator. The full system is orchestrated through LangGraph, with a commercial LLM API (GPT-4) serving as the reasoning backbone.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/System Architecture.drawio.png}
+    \caption{Overall system architecture of the proposed two-tier multi-agent framework.}
+    \label{fig:sysarch}
+\end{figure}
+
+The design is guided by four principles. \emph{Separation of timescales}: slow semantic reasoning by LLM agents is decoupled from fast rule-based execution so that LLM inference latency does not propagate into the per-TTI control loop. \emph{Role specialisation}: each slice type is represented by a dedicated agent whose prompts and internal reasoning are tailored to the characteristics of that slice, while a global coordinator agent is responsible exclusively for cross-slice arbitration. \emph{Structured communication}: inter-agent messages are exchanged as structured JSON artefacts rather than as free-form natural language, in the spirit of MetaGPT~\cite{hong2023metagpt}, in order to limit information loss and to make the behaviour of the system inspectable. \emph{Graceful degradation}: whenever the LLM layer fails to produce a decision within a predefined latency budget, the system automatically falls back to a rule-based controller, so that the operational stability of the network is never contingent on the responsiveness of an external API.
+
+\subsection{Two-Tier Scheduling Framework}
+
+A central challenge addressed by the design is the order-of-magnitude gap between the inference latency of contemporary LLMs -- typically hundreds of milliseconds to a few seconds per call -- and the millisecond-level timescale at which radio scheduling decisions must be taken. Placing an LLM directly on the per-TTI control loop is therefore infeasible. Instead, the proposed framework adopts an explicit two-tier scheduling architecture, illustrated in Figure~\ref{fig:twotier}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/Two-Tier Scheduling.png}
+    \caption{Two-tier scheduling: slow LLM policy updates at the upper tier and fast rule-based execution at the lower tier.}
+    \label{fig:twotier}
+\end{figure}
+
+The \emph{upper tier}, or LLM decision layer, is triggered once every $100$ TTIs (i.e.\ approximately one second) in the baseline configuration. At each trigger, the slice-manager agents and the global coordinator agent execute one round of the proposal--evaluation--negotiation protocol and update the inter-slice bandwidth allocation quotas. An emergency decision can additionally be triggered when the measured SLA violation rate exceeds a predefined threshold, so that the framework is able to react to sudden changes in traffic conditions.
+
+The \emph{lower tier}, or fast execution layer, operates at a TTI-level granularity of approximately $10$\,ms. Within each decision window it executes a cached rule-based strategy that enforces the inter-slice quotas produced by the upper tier, without invoking the LLM. This layer is responsible for per-user scheduling inside each slice and for monitoring SLA-related indicators that feed back into the upper tier.
+
+A \emph{maximum decision latency threshold} of $2$ seconds is enforced on the upper tier. If the LLM layer fails to return a decision within this budget, the system automatically falls back to a rule-based allocation policy so that normal operation is preserved. This fallback behaviour is a direct consequence of the graceful degradation principle introduced in Section~3.1.
+
+\subsection{Agent Role Definition and Internal Logic}
+
+The proposed framework defines four agents: one slice-manager agent per slice type (eMBB, URLLC, mMTC) and a single global coordinator agent. Each agent shares a common internal structure consisting of three modules -- \emph{Perception}, \emph{Planning} and \emph{Action} -- in line with the cognitive architecture pattern adopted by WirelessAgent~\cite{tong2025wirelessagent} and surveyed more broadly by Wang \emph{et al.}~\cite{wang2023agentsurvey}.
+
+\paragraph{Slice Manager Agent.} A slice-manager agent is instantiated for each of the three slice types. The Perception module converts the numerical state of the slice (user count, average CQI, buffer occupancy and current SLA satisfaction rate) into a structured natural-language description that is fed into the LLM prompt. The Planning module uses Chain-of-Thought prompting~\cite{wei2022cot} to assess the current resource demand of the slice in light of its SLA targets. The Action module outputs a resource demand proposal consisting of a requested bandwidth share, a minimum acceptable share, a priority declaration and a short justification, all encoded in a structured JSON format.
+
+\paragraph{Global Coordinator Agent.} A single global coordinator agent is responsible for cross-slice arbitration. Its Perception module aggregates the proposals produced by the slice-manager agents together with the global resource state. The Planning module determines whether the proposals are jointly compatible -- that is, whether the sum of the requested shares can be satisfied within the available bandwidth budget. If the proposals are compatible, they are approved directly. If a conflict is detected, the negotiation protocol described in Section~3.4 is triggered. The Action module executes the final bandwidth allocation scheme and invokes the corresponding simulation environment API.
+
+\subsection{Proposal--Evaluation--Negotiation Protocol}
+
+When the coordinator detects that the aggregate demand exceeds the available capacity, a three-phase negotiation protocol is triggered. The overall message flow is shown in Figure~\ref{fig:negflow}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/Multi-Agent Negotiation Flow.drawio.png}
+    \caption{Message flow of the three-phase proposal--evaluation--negotiation protocol.}
+    \label{fig:negflow}
+\end{figure}
+
+\paragraph{Phase~1 -- Proposal.} Each slice-manager agent independently evaluates its current demand and submits a resource proposal as a structured JSON message. The proposal contains the requested bandwidth share, the minimum acceptable share, a priority tag and a short natural-language justification that supports subsequent reasoning steps.
+
+\paragraph{Phase~2 -- Evaluation.} The global coordinator agent evaluates the joint feasibility of the proposals. Feasibility checks include whether the sum of the requested shares exceeds the available bandwidth and whether any hard priority rules are violated (for instance, the convention that URLLC traffic is privileged over eMBB when its latency requirements are at risk). If the proposals are jointly feasible, they are approved and forwarded to the lower tier; otherwise the protocol proceeds to negotiation.
+
+\paragraph{Phase~3 -- Negotiation.} The coordinator proposes an initial arbitration scheme. Affected slice-manager agents may raise objections or submit alternative proposals, subject to a cap of three negotiation rounds in order to bound both latency and token consumption. Two arbitration strategies are supported. \emph{Priority arbitration} imposes a hard ordering in which URLLC is served before eMBB and eMBB before mMTC. \emph{Proportional compromise} requires each slice to reduce its requested share proportionally, but not below its declared minimum acceptable value. The choice between these two strategies is an experimental variable in Chapter~4.
+
+Messages exchanged during negotiation are always encoded as structured JSON. This design decision is motivated by the observation made in the MetaGPT study~\cite{hong2023metagpt} that structured artefact exchange reduces information loss relative to unconstrained natural-language dialogue, and has the additional practical benefit of facilitating logging, auditability and post-hoc analysis.
+
+\subsection{Gymnasium-Based Simulation Environment}
+
+A custom 5G network slicing simulation environment is implemented in Python using the Gymnasium interface~\cite{brockman2016gym}. The environment exposes the standard \texttt{reset} and \texttt{step} methods and can be used interchangeably by all baseline methods described in Section~3.7.
+
+\paragraph{State space.} The state space is a $15$-dimensional real-valued vector that summarises the situation of the three slices, as detailed in Table~\ref{table:state}. For each slice the vector contains the normalised user count, the average Channel Quality Indicator, the buffer occupancy, the current bandwidth share and the SLA satisfaction rate measured over a sliding window.
+
+\begin{table}[h]
+    \centering
+    \begin{spacing}{1.35}
+    \caption{State space definition and normalisation.}\vspace{0.7em}
+    \label{table:state}
+    \begin{tabular}{|p{3cm}|p{6cm}|p{2.5cm}|p{2.5cm}|}
+    \hline
+    \textbf{Dimension} & \textbf{Meaning} & \textbf{Range} & \textbf{Normalisation} \\
+    \hline
+    $n_i$ ($\times 3$) & Current user count per slice & $[0, N_{\max}]$ & $/ N_{\max}$ \\
+    \hline
+    $\bar{c}_i$ ($\times 3$) & Average CQI per slice & $[1, 15]$ & $/ 15$ \\
+    \hline
+    $b_i$ ($\times 3$) & Buffer occupancy per slice & $[0, 1]$ & Raw value \\
+    \hline
+    $a_i$ ($\times 3$) & Current bandwidth allocation ratio & $[0, 1]$ & Raw value \\
+    \hline
+    $s_i$ ($\times 3$) & Per-slice SLA satisfaction rate (sliding window) & $[0, 1]$ & Raw value \\
+    \hline
+    \end{tabular}
+    \end{spacing}
+\end{table}
+
+\paragraph{Action space.} The action space is a continuous vector $\mathbf{a} = (a_{\text{eMBB}}, a_{\text{URLLC}}, a_{\text{mMTC}})$ subject to the simplex constraint $\sum_i a_i = 1$ and the per-slice lower bound $a_i \geq 0.05$. The lower bound guarantees that no slice can be entirely starved of resources, reflecting the operational convention that every admitted slice retains a minimum quota.
+
+\paragraph{Reward function.} The reward function is defined as
+\begin{equation}
+R = w_S \cdot \bar{S} + w_U \cdot U - w_V \cdot V,
+\end{equation}
+where $\bar{S}$ denotes the weighted average per-slice SLA satisfaction rate, $U$ the overall bandwidth utilisation and $V$ the SLA violation penalty, with all three quantities normalised to $[0,1]$. The coefficients $w_S$, $w_U$ and $w_V$ are tunable hyperparameters satisfying $w_S + w_U + w_V = 1$.
+
+\paragraph{SLA evaluation.} Table~\ref{table:sla} lists the SLA conditions adopted in the simulation together with their design intent. It is important to emphasise that these definitions represent \emph{relative priority isolation} rather than strict 3GPP end-to-end physical-layer metrics. For example, the URLLC SLA is defined in terms of the ratio between the $99$\textsuperscript{th}-percentile queueing delay of URLLC flows and that of eMBB flows, which serves as a proxy for the relative prioritisation of URLLC traffic in the scheduler rather than as a guarantee of a specific millisecond target. The implications of this abstraction are revisited in Chapter~4.
+
+\begin{table}[h]
+    \centering
+    \begin{spacing}{1.35}
+    \caption{Simulation-layer SLA approximations per slice type.}\vspace{0.7em}
+    \label{table:sla}
+    \begin{tabular}{|p{2.5cm}|p{5.5cm}|p{3.5cm}|p{2.5cm}|}
+    \hline
+    \textbf{Slice} & \textbf{SLA Condition} & \textbf{Design Intent} & \textbf{Typical Use} \\
+    \hline
+    eMBB & Average user throughput $\geq 50$\,Mbps & High throughput guarantee & Video streaming \\
+    \hline
+    URLLC & $99$\textsuperscript{th}-percentile queueing delay $\leq 10\%$ of eMBB's delay & Relative high-priority guarantee & Industrial control \\
+    \hline
+    mMTC & Access success rate $\geq 95\%$ & Massive access guarantee & IoT sensors \\
+    \hline
+    \end{tabular}
+    \end{spacing}
+\end{table}
+
+\subsection{LangGraph-Orchestrated Agent Workflow}
+
+The multi-agent workflow is orchestrated through LangGraph, a state-machine library designed for long-chain and multi-agent LLM applications. Each agent is implemented as a node whose state transitions are explicitly modelled, and messages between nodes are carried by a shared global state object. This choice is motivated by two considerations. First, LangGraph makes the control flow of the negotiation protocol explicit and inspectable, which is important for debugging and for reproducibility. Second, the state-machine abstraction maps naturally onto the three phases of the negotiation protocol: each phase corresponds to a distinct set of transitions, and the maximum-round constraint is enforced by a simple counter stored in the shared state.
+
+Each upper-tier decision cycle proceeds as follows. The current simulation state is fetched by the coordinator and distributed to the slice-manager nodes. Each slice-manager node executes its Perception--Planning--Action pipeline and writes a proposal back to the shared state. The coordinator then executes the evaluation phase; if the proposals are compatible, the workflow terminates and emits an allocation vector to the lower tier. Otherwise, the workflow enters the negotiation phase, which may iterate for up to three rounds before the coordinator commits to a final allocation. Throughout this process, all messages are logged in structured JSON format, enabling the offline analysis of negotiation dynamics that is reported in Chapter~4.
+
+\subsection{Baseline Methods and Implementation Details}
+
+In order to answer RQ1 and RQ2, five methods are implemented and evaluated within the same simulation environment. The set of comparison methods is summarised in Table~\ref{table:methods}.
+
+\begin{table}[h]
+    \centering
+    \begin{spacing}{1.35}
+    \caption{Summary of compared methods and baselines.}\vspace{0.7em}
+    \label{table:methods}
+    \begin{tabular}{|p{1cm}|p{3.5cm}|p{3.5cm}|p{5.5cm}|}
+    \hline
+    \textbf{ID} & \textbf{Method} & \textbf{Category} & \textbf{Description} \\
+    \hline
+    M1 & Fixed-Ratio & Rule-based & Fixed ratio allocation (eMBB:URLLC:mMTC $=$ 5:3:2)~\cite{nasser2025hybrid} \\
+    \hline
+    M2 & Threshold-based & Rule-based & Dynamic adjustment triggered by SLA violation threshold \\
+    \hline
+    M3 & PPO & Deep reinforcement learning & MLP policy network trained to convergence~\cite{schulman2017ppo} \\
+    \hline
+    M4 & Single-Agent LLM & Single-agent LLM & GPT-4 with Chain-of-Thought prompting, no collaboration \\
+    \hline
+    M5 & Multi-Agent LLM & Multi-agent LLM (this work) & Slice agents + coordinator + negotiation protocol \\
+    \hline
+    \end{tabular}
+    \end{spacing}
+\end{table}
+
+The two rule-based baselines, M1 and M2, establish interpretable references for the comparison. M1 enforces a fixed $5\!:\!3\!:\!2$ allocation between eMBB, URLLC and mMTC, which reflects a commonly adopted traffic composition assumption in network slicing simulations~\cite{nasser2025hybrid}. It serves as a conservative performance floor. M2 dynamically adjusts the inter-slice quotas when the SLA violation rate exceeds a configurable threshold, and represents a simple engineering heuristic of the kind often deployed in operational settings.
+
+The DRL baseline M3 is implemented as a Proximal Policy Optimisation (PPO) agent~\cite{schulman2017ppo} using the Stable-Baselines3 library with a Multi-Layer Perceptron policy network. Training is run to convergence, defined as an average reward change rate below $1\%$ over the most recent $50$ episodes, with a cap of $1{,}000$ episodes, and the training curves are recorded for later inspection.
+
+The single-agent LLM baseline M4 uses a single GPT-4 instance that receives the full global network state and produces a bandwidth allocation decision through Chain-of-Thought reasoning~\cite{wei2022cot}. M4 intentionally omits any multi-agent collaboration and therefore acts as the most direct comparison point for isolating the effect of the multi-agent design.
+
+Finally, M5 is the full multi-agent framework described in the preceding sections. For the purposes of RQ2 an ablation variant, denoted M5-no-neg, is also implemented: this variant retains the slice-manager agents but replaces the negotiation protocol with a direct, dictatorial allocation by the coordinator. Comparing M5 with M5-no-neg allows the contribution of the negotiation protocol to be isolated from the contribution of merely invoking additional LLM calls.
+
+All methods share the same experimental configuration, including the system bandwidth of $100$\,MHz (aligned with the NR n78 reference band), the user population of $100$ active users, an LLM decision cycle of one second, a lower-tier execution granularity of $10$\,ms, the $2$-second maximum decision latency threshold, and an episode length of $500$ LLM decision cycles. The experimental protocol based on this configuration is described in Chapter~4.

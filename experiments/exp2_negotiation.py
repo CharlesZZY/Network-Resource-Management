@@ -1,88 +1,74 @@
-"""实验2: 协商机制验证 (RQ2) — M5-PA vs M5-PC vs M5-no-neg"""
+"""实验2: 协商机制验证 (RQ2) — 单 method CLI 入口.
 
-import os
+实验2涉及 M5-PA / M5-PC / M5-NoNeg 三种 method.
+- M5-PA 和 M5-PC 与实验1共用 per-method 目录 (配置完全一致),
+  通常在运行 exp1 时已写入; 此处仅需单独跑 M5-NoNeg.
+- 也可以通过本脚本直接单独运行 M5-PA / M5-PC, 便于灵活并行.
 
-import pandas as pd
+每次调用只运行一种 method, 将结果写入
+    results/data/per_method/<method>/{episodes.csv, steps.csv}
 
-from experiments.runner import load_config, run_experiment
+并行运行示例:
+    python -m experiments.exp2_negotiation M5-NoNeg
+"""
+
+import argparse
+
+from experiments.runner import (
+    load_config,
+    run_experiment,
+    save_method_results,
+)
 from src.agents.multi_agent_graph import MultiAgentNoNegPolicy, MultiAgentPolicy
 
 
-def run_exp2(config=None, exp1_episodes_df=None):
+EXP2_METHODS = {
+    "M5-PA":    lambda cfg: MultiAgentPolicy(strategy="priority",     max_rounds=3),
+    "M5-PC":    lambda cfg: MultiAgentPolicy(strategy="proportional", max_rounds=3),
+    "M5-NoNeg": lambda cfg: MultiAgentNoNegPolicy(),
+}
+
+
+def run_exp2_method(method_name: str, config: dict | None = None):
+    """Run a single exp2 method across all scenarios, write per-method CSVs."""
+    if method_name not in EXP2_METHODS:
+        raise ValueError(
+            f"Unknown method '{method_name}'. "
+            f"Valid: {list(EXP2_METHODS)}"
+        )
+
     config = config or load_config()
-
-    # 尝试复用实验1中M5-PA和M5-PC的数据
-    reused = []
-    if exp1_episodes_df is not None:
-        for m in ["M5-PA", "M5-PC"]:
-            subset = exp1_episodes_df[exp1_episodes_df["method"] == m]
-            if len(subset) > 0:
-                reused.append(subset)
-                print(f"复用实验1中 {m} 的数据 ({len(subset)} episodes)")
-
-    # 如果没有可复用的, 重新跑M5-PA和M5-PC
-    need_run = {}
-    reused_methods = set()
-    if reused:
-        for df in reused:
-            reused_methods.update(df["method"].unique())
-
-    if "M5-PA" not in reused_methods:
-        need_run["M5-PA"] = lambda: MultiAgentPolicy(strategy="priority", max_rounds=3)
-    if "M5-PC" not in reused_methods:
-        need_run["M5-PC"] = lambda: MultiAgentPolicy(strategy="proportional", max_rounds=3)
-    need_run["M5-NoNeg"] = lambda: MultiAgentNoNegPolicy()
+    factory_fn = EXP2_METHODS[method_name]
 
     all_episode_metrics = []
     all_step_records = []
 
     for scenario in config["experiment"]["scenarios"]:
-        for name, factory in need_run.items():
-            print(f"\n=== 实验2: {name} / {scenario} ===")
-            ep_metrics, step_records = run_experiment(
-                factory, config, scenario, name
-            )
-            all_episode_metrics.extend(ep_metrics)
-            all_step_records.extend(step_records)
+        print(f"\n=== 实验2: {method_name} / {scenario} ===")
+        ep_metrics, step_records = run_experiment(
+            lambda: factory_fn(config), config, scenario, method_name
+        )
+        all_episode_metrics.extend(ep_metrics)
+        all_step_records.extend(step_records)
 
-    df_new_episodes = pd.DataFrame(all_episode_metrics)
-    df_new_steps = pd.DataFrame(all_step_records)
+    save_method_results(method_name, all_episode_metrics, all_step_records)
+    print(f"\n实验2 ({method_name}) 完成, 数据已保存到 "
+          f"results/data/per_method/{method_name}/")
+    return all_episode_metrics, all_step_records
 
-    # 合并复用数据
-    if reused:
-        df_episodes = pd.concat(reused + [df_new_episodes], ignore_index=True)
-    else:
-        df_episodes = df_new_episodes
-    df_steps = df_new_steps  # step级数据只保留新运行的
 
-    # 只保留实验2涉及的方法
-    exp2_methods = ["M5-PA", "M5-PC", "M5-NoNeg"]
-    df_episodes = df_episodes[df_episodes["method"].isin(exp2_methods)]
-
-    df_episodes.to_csv("results/data/exp2_episodes.csv", index=False)
-    df_steps.to_csv("results/data/exp2_steps.csv", index=False)
-
-    summary = df_episodes.groupby(["method", "scenario"]).agg({
-        "sla_embb": ["mean", "std"],
-        "sla_urllc": ["mean", "std"],
-        "sla_mmtc": ["mean", "std"],
-        "sla_avg": ["mean", "std"],
-        "throughput_mean": ["mean", "std"],
-        "bandwidth_util": ["mean", "std"],
-        "fairness": ["mean", "std"],
-        "decision_latency_mean": ["mean", "std"],
-        "total_tokens": ["mean", "std"],
-    }).round(4)
-    summary.columns = [f"{col[0]}_{col[1]}" for col in summary.columns]
-    summary.to_csv("results/data/exp2_comparison_table.csv")
-
-    print("\n实验2完成, 数据已保存到 results/data/")
-    return df_episodes, df_steps
+def main():
+    parser = argparse.ArgumentParser(
+        description="Run a single exp2 method and write per-method results."
+    )
+    parser.add_argument(
+        "method",
+        choices=list(EXP2_METHODS),
+        help="Method id to run (M5-PA, M5-PC, M5-NoNeg).",
+    )
+    args = parser.parse_args()
+    run_exp2_method(args.method)
 
 
 if __name__ == "__main__":
-    # 尝试加载实验1数据
-    exp1_df = None
-    if os.path.exists("results/data/exp1_episodes.csv"):
-        exp1_df = pd.read_csv("results/data/exp1_episodes.csv")
-    run_exp2(exp1_episodes_df=exp1_df)
+    main()

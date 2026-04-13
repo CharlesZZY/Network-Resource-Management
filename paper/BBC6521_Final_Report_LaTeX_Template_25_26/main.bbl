@@ -1,0 +1,118 @@
+\begin{thebibliography}{10}
+
+\bibitem{afolabi2018slicing}
+Afolabi I, Taleb T, Samdanis K, Ksentini A, Flinck H.
+\newblock Network Slicing and Softwarization: A Survey on Principles, Enabling Technologies, and Solutions.
+\newblock IEEE Communications Surveys \& Tutorials. 2018;20(3):2429-53.
+
+\bibitem{li2018drl}
+Li R, et~al.
+\newblock Deep Reinforcement Learning for Resource Management in Network Slicing.
+\newblock IEEE Access. 2018;6:74429-41.
+
+\bibitem{sciancalepore2019rlnsb}
+Sciancalepore V, Costa-Perez X, Banchs A.
+\newblock {RL-NSB}: Reinforcement Learning-Based {5G} Network Slice Broker.
+\newblock IEEE/ACM Transactions on Networking. 2019;27(4):1543-57.
+
+\bibitem{zhou2024llmtelecom}
+Zhou H, et~al.
+\newblock Large Language Model ({LLM}) for Telecommunications: A Comprehensive Survey on Principles, Key Techniques, and Opportunities.
+\newblock IEEE Communications Surveys \& Tutorials. 2024.
+
+\bibitem{wang2023agentsurvey}
+Wang L, et~al.. A Survey on Large Language Model based Autonomous Agents; 2023.
+\newblock ArXiv:2308.11432.
+\newblock \url{https://arxiv.org/abs/2308.11432}.
+
+\bibitem{tong2025wirelessagent}
+Tong J, et~al.. {WirelessAgent: Large Language Model Agents for Intelligent Wireless Networks}; 2025.
+\newblock ArXiv:2505.01074.
+\newblock \url{https://arxiv.org/abs/2505.01074}.
+
+\bibitem{shao2024wirelessllm}
+Shao J, et~al.
+\newblock {WirelessLLM: Empowering Large Language Models Towards Wireless Intelligence}.
+\newblock Journal of Communications and Information Networks. 2024;9(2):99-112.
+
+\bibitem{jiang2024commllm}
+Jiang F, et~al.
+\newblock Large Language Model Enhanced Multi-Agent Systems for {6G} Communications.
+\newblock IEEE Wireless Communications. 2024;31(6):48-55.
+
+\bibitem{caballero2019games}
+Caballero P, Banchs A, Veciana GD, Costa-Perez X.
+\newblock Network Slicing Games: Enabling Customization in Multi-Tenant Mobile Networks.
+\newblock IEEE/ACM Transactions on Networking. 2019;27(2):662-75.
+
+\bibitem{hong2023metagpt}
+Hong S, et~al.. {MetaGPT}: Meta Programming for Multi-Agent Collaborative Framework; 2023.
+\newblock ArXiv:2308.00352.
+\newblock \url{https://arxiv.org/abs/2308.00352}.
+
+\bibitem{qian2023chatdev}
+Qian C, et~al.. {ChatDev}: Communicative Agents for Software Development; 2023.
+\newblock ArXiv:2307.07924.
+\newblock \url{https://arxiv.org/abs/2307.07924}.
+
+\bibitem{brockman2016gym}
+Brockman G, et~al.. {OpenAI Gym}; 2016.
+\newblock ArXiv:1606.01540.
+\newblock \url{https://arxiv.org/abs/1606.01540}.
+
+\bibitem{nasser2025hybrid}
+Nasser AR, Alani OY.
+\newblock Investigation of Multiple Hybrid Deep Learning Models for Accurate and Optimized Network Slicing.
+\newblock Computers. 2025;14(5):174.
+
+\bibitem{lotfi2025oranguide}
+Lotfi F, Rajoli H, Afghah F. {ORAN-GUIDE}: {RAG-Driven} Prompt Learning for {LLM-Augmented} Reinforcement Learning in {O-RAN} Network Slicing; 2025.
+\newblock ArXiv:2506.00576.
+\newblock \url{https://arxiv.org/abs/2506.00576}.
+
+\bibitem{qu2025dualloop}
+Qu Z, Wang W, Yu Z, Sun B, Li Y, Zhang X. {LLM Enabled Multi-Agent System for 6G Networks: Framework and Method of Dual-Loop Edge-Terminal Collaboration}; 2025.
+\newblock ArXiv:2509.04993.
+\newblock \url{https://arxiv.org/abs/2509.04993}.
+
+\bibitem{lewis2020rag}
+Lewis P, et~al.
+\newblock Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks.
+\newblock In: Advances in Neural Information Processing Systems (NeurIPS); 2020. .
+
+\bibitem{wu2024netllm}
+Wu D, et~al.
+\newblock {NetLLM: Adapting Large Language Models for Networking}.
+\newblock In: Proceedings of the ACM SIGCOMM 2024 Conference; 2024. .
+
+\bibitem{chen2024netgpt}
+Chen Y, et~al.
+\newblock {NetGPT}: An {AI-Native} Network Architecture for Provisioning Beyond Personalized Generative Services.
+\newblock IEEE Network. 2024.
+
+\bibitem{chergui2025collective}
+Chergui H, Cid MC, Sayyad KP, Mur DC, Verikoukis C. Toward an Unbiased Collective Memory for Efficient {LLM-Based} Agentic {6G} Cross-Domain Management; 2025.
+\newblock ArXiv:2509.26200.
+\newblock \url{https://arxiv.org/abs/2509.26200}.
+
+\bibitem{wu2023autogen}
+Wu Q, et~al.. {AutoGen}: Enabling Next-Gen {LLM} Applications via Multi-Agent Conversation; 2023.
+\newblock ArXiv:2308.08155.
+\newblock \url{https://arxiv.org/abs/2308.08155}.
+
+\bibitem{li2023camel}
+Li G, Kader A, Itani H, Khizbullin D, Ghanem B. {CAMEL}: Communicative Agents for ``Mind'' Exploration of Large Language Model Society; 2023.
+\newblock ArXiv:2303.17760.
+\newblock \url{https://arxiv.org/abs/2303.17760}.
+
+\bibitem{wei2022cot}
+Wei J, et~al.. Chain of Thought Prompting Elicits Reasoning in Large Language Models; 2022.
+\newblock ArXiv:2201.11903.
+\newblock \url{https://arxiv.org/abs/2201.11903}.
+
+\bibitem{schulman2017ppo}
+Schulman J, Wolski F, Dhariwal P, Radford A, Klimov O. Proximal Policy Optimization Algorithms; 2017.
+\newblock ArXiv:1707.06347.
+\newblock \url{https://arxiv.org/abs/1707.06347}.
+
+\end{thebibliography}

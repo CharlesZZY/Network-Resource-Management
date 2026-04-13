@@ -1,6 +1,8 @@
 import time
+from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import yaml
 from tqdm import tqdm
 
@@ -8,9 +10,63 @@ from src.environment.slicing_env import NetworkSlicingEnv
 from src.utils.metrics import aggregate_episode_metrics
 
 
+PER_METHOD_BASE = "results/data/per_method"
+
+
 def load_config(path="config.yaml"):
     with open(path) as f:
         return yaml.safe_load(f)
+
+
+# ---------------------------------------------------------------------------
+# Per-method result IO helpers
+# ---------------------------------------------------------------------------
+
+def per_method_dir(method_name: str, base: str = PER_METHOD_BASE) -> Path:
+    """Return (and create) the directory for a given method's results."""
+    d = Path(base) / method_name
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def save_method_results(method_name: str, ep_metrics: list[dict],
+                        step_records: list[dict],
+                        base: str = PER_METHOD_BASE) -> None:
+    """Write a method's episode + step CSVs under results/data/per_method/<method>/."""
+    d = per_method_dir(method_name, base)
+    pd.DataFrame(ep_metrics).to_csv(d / "episodes.csv", index=False)
+    pd.DataFrame(step_records).to_csv(d / "steps.csv", index=False)
+
+
+def load_method_results(method_name: str,
+                        base: str = PER_METHOD_BASE
+                        ) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Read back per-method CSVs. Raises FileNotFoundError if either file is missing."""
+    d = Path(base) / method_name
+    ep_path = d / "episodes.csv"
+    st_path = d / "steps.csv"
+    if not ep_path.exists() or not st_path.exists():
+        raise FileNotFoundError(
+            f"Per-method data for {method_name} not found under {d} "
+            f"(missing episodes.csv or steps.csv)"
+        )
+    return pd.read_csv(ep_path), pd.read_csv(st_path)
+
+
+SUMMARY_METRICS = [
+    "sla_embb", "sla_urllc", "sla_mmtc", "sla_avg",
+    "throughput_mean", "bandwidth_util", "fairness",
+    "decision_latency_mean", "total_tokens",
+]
+
+
+def build_summary_table(df_episodes: pd.DataFrame) -> pd.DataFrame:
+    """Group by (method, scenario) and compute mean/std for the summary columns."""
+    agg = df_episodes.groupby(["method", "scenario"]).agg(
+        {m: ["mean", "std"] for m in SUMMARY_METRICS}
+    ).round(4)
+    agg.columns = [f"{col[0]}_{col[1]}" for col in agg.columns]
+    return agg
 
 
 def run_episode(env: NetworkSlicingEnv, policy, num_cycles: int, seed: int,

@@ -1,0 +1,78 @@
+This is BibTeX, Version 0.99d (TeX Live 2024)
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: main.aux
+The style file: vancouver.bst
+A level-1 auxiliary file: cover.aux
+Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
+Reallocated global_strs (elt_size=200001) to 20 items from 10.
+Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Database file #1: reference.bib
+Warning--empty author and editor in wang2023agentsurvey
+Warning--missing publisher in wang2023agentsurvey
+Warning--empty author and editor in tong2025wirelessagent
+Warning--missing publisher in tong2025wirelessagent
+Warning--empty author and editor in hong2023metagpt
+Warning--missing publisher in hong2023metagpt
+Warning--empty author and editor in qian2023chatdev
+Warning--missing publisher in qian2023chatdev
+Warning--empty author and editor in brockman2016gym
+Warning--missing publisher in brockman2016gym
+Warning--empty author and editor in lotfi2025oranguide
+Warning--missing publisher in lotfi2025oranguide
+Warning--empty author and editor in qu2025dualloop
+Warning--missing publisher in qu2025dualloop
+Warning--empty pages in lewis2020rag
+Warning--empty pages in wu2024netllm
+Warning--empty author and editor in chergui2025collective
+Warning--missing publisher in chergui2025collective
+Warning--empty author and editor in wu2023autogen
+Warning--missing publisher in wu2023autogen
+Warning--empty author and editor in li2023camel
+Warning--missing publisher in li2023camel
+Warning--empty author and editor in wei2022cot
+Warning--missing publisher in wei2022cot
+Warning--empty author and editor in schulman2017ppo
+Warning--missing publisher in schulman2017ppo
+You've used 23 entries,
+            3507 wiz_defined-function locations,
+            820 strings with 8922 characters,
+and the built_in function-call counts, 27865 in all, are:
+= -- 3149
+> -- 321
+< -- 124
++ -- 202
+- -- 71
+* -- 1989
+:= -- 3090
+add.period$ -- 78
+call.type$ -- 23
+change.case$ -- 16
+chr.to.int$ -- 280
+cite$ -- 49
+duplicate$ -- 2611
+empty$ -- 2656
+format.name$ -- 89
+if$ -- 6560
+int.to.chr$ -- 0
+int.to.str$ -- 23
+missing$ -- 214
+newline$ -- 118
+num.names$ -- 23
+pop$ -- 560
+preamble$ -- 1
+purify$ -- 0
+quote$ -- 0
+skip$ -- 442
+stack$ -- 0
+substring$ -- 4142
+swap$ -- 511
+text.length$ -- 43
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 0
+warning$ -- 26
+while$ -- 178
+width$ -- 25
+write$ -- 251
+(There were 26 warnings)

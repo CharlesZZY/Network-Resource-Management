@@ -12,14 +12,16 @@ matplotlib.use("Agg")
 FIGURES_DIR = "results/figures"
 os.makedirs(FIGURES_DIR, exist_ok=True)
 
+# High-contrast categorical palette (tab10-inspired): M3 was teal (#1abc9c) and
+# M5-PC was green (#2ecc71), which read similarly on screen; M3 is now brown.
 METHOD_COLORS = {
-    "M1-Fixed": "#7f8c8d",
-    "M2-Threshold": "#3498db",
-    "M3-PPO": "#1abc9c",
-    "M4-SingleLLM": "#e67e22",
-    "M5-PA": "#e74c3c",
-    "M5-PC": "#2ecc71",
-    "M5-NoNeg": "#9b59b6",
+    "M1-Fixed": "#7f7f7f",
+    "M2-Threshold": "#1f77b4",
+    "M3-PPO": "#8c564b",
+    "M4-SingleLLM": "#ff7f0e",
+    "M5-PA": "#d62728",
+    "M5-PC": "#2ca02c",
+    "M5-NoNeg": "#9467bd",
 }
 
 SLICE_NAMES = ["eMBB", "URLLC", "mMTC"]

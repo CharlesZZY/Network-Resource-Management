@@ -1,5 +1,6 @@
 """M3-PPO: Proximal Policy Optimisation baseline using Stable-Baselines3."""
 
+import os
 import time
 
 import gymnasium as gym
@@ -16,16 +17,24 @@ from src.environment.slicing_env import NetworkSlicingEnv
 # ---------------------------------------------------------------------------
 
 class MixedScenarioEnv(gym.Wrapper):
-    """Randomly switches between steady / burst on each episode reset."""
+    """Randomly switches between steady / burst on each episode reset.
 
-    def __init__(self, config: dict, burst_prob: float = 0.4):
+    Uses a dedicated Generator seeded from the passed ``seed`` so the
+    burst-prob coin flip is reproducible and isolated from global state.
+    """
+
+    def __init__(self, config: dict, burst_prob: float = 0.4,
+                 seed: int | None = None):
         env = NetworkSlicingEnv(config, scenario="steady")
+        # Ensure episode length matches the evaluation config.
+        env.cfg["max_steps"] = config["experiment"].get("num_cycles", 100)
         super().__init__(env)
         self.burst_prob = burst_prob
+        self._rng = np.random.default_rng(seed)
 
     def reset(self, **kwargs):
         self.env.scenario = (
-            "burst" if np.random.random() < self.burst_prob else "steady"
+            "burst" if self._rng.random() < self.burst_prob else "steady"
         )
         return self.env.reset(**kwargs)
 
@@ -117,11 +126,18 @@ class PPOTrainer:
         self.early_stop_window = ppo_cfg.get("early_stop_window", 50)
         self.early_stop_threshold = ppo_cfg.get("early_stop_threshold", 0.01)
         self.burst_prob = ppo_cfg.get("burst_prob", 0.4)
+        self.seed = ppo_cfg.get("seed", 42)
 
     def train(self, model_path: str = "results/models/ppo_model",
-              curve_path: str = "results/data/ppo_training_curve.csv",
+              curve_path: str = "results/data/per_method/M3-PPO/training_curve.csv",
+              seed: int | None = None,
               verbose: int = 1) -> PPO:
-        env = MixedScenarioEnv(self.config, burst_prob=self.burst_prob)
+        seed = self.seed if seed is None else seed
+
+        env = MixedScenarioEnv(
+            self.config, burst_prob=self.burst_prob, seed=seed
+        )
+        env.reset(seed=seed)
 
         total_timesteps = (
             self.max_episodes
@@ -136,6 +152,7 @@ class PPOTrainer:
             batch_size=self.batch_size,
             n_epochs=self.n_epochs,
             gamma=self.gamma,
+            seed=seed,
             verbose=0,
         )
 
@@ -148,10 +165,11 @@ class PPOTrainer:
 
         if verbose >= 1:
             print(f"  PPO training: max_episodes={self.max_episodes}, "
-                  f"total_timesteps={total_timesteps}")
+                  f"total_timesteps={total_timesteps}, seed={seed}")
 
         model.learn(total_timesteps=total_timesteps, callback=callback)
 
+        os.makedirs(os.path.dirname(model_path) or ".", exist_ok=True)
         model.save(model_path)
         if verbose >= 1:
             print(f"  Model saved to {model_path}.zip")
@@ -161,6 +179,7 @@ class PPOTrainer:
             "reward": callback.episode_rewards,
             "length": callback.episode_lengths,
         })
+        os.makedirs(os.path.dirname(curve_path) or ".", exist_ok=True)
         curve_df.to_csv(curve_path, index=False)
         if verbose >= 1:
             print(f"  Training curve saved to {curve_path}")
@@ -176,6 +195,12 @@ class PPOPolicy:
     """Wraps a trained PPO model to match the decide(obs, env) interface."""
 
     def __init__(self, model_path: str = "results/models/ppo_model.zip"):
+        if not os.path.exists(model_path):
+            raise FileNotFoundError(
+                f"PPO model not found at {model_path}. "
+                f"Train it first by running:\n"
+                f"    python -m experiments.train_ppo"
+            )
         self.model = PPO.load(model_path)
 
     def decide(self, obs, env=None):

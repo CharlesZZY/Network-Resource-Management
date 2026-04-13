@@ -1,0 +1,71 @@
+\section*{Risk and Environmental Impact Assessment}
+\setcounter{section}{6} \setcounter{subsection}{0}
+\phantomsection \addcontentsline{toc}{section}{\textit{Risk and Environmental Impact Assessment}}
+
+\noindent
+Likelihood $L$, consequence $C$, and risk $R = L \times C$ are scored as in the
+QMUL handbook (Sect.~3.6.12). The subsections below give the project-specific
+analysis.
+
+\subsection*{1. Risks to successful project completion}
+
+The work combines a custom Gymnasium slicing simulator, Stable-Baselines3 PPO
+training, and LangGraph-orchestrated multi-agent LLM policies with external API
+calls. The main risks are summarised as Items~R1--R4.
+
+\begin{description}\setlength{\itemsep}{6pt}
+\item[R1 --- LLM API outage, quota, or key invalidation]
+$L{=}3$, $C{=}3$, $R{=}9$ (significant). Mitigation: use configured retries and
+timeouts in \texttt{config.yaml}; fall back to rule-based and PPO baselines;
+split LLM batches; document partial results if a full sweep cannot finish.
+\item[R2 --- Underestimated experiment and write-up time]
+$L{=}3$, $C{=}3$, $R{=}9$ (significant). Mitigation: prioritise core method
+comparisons (M1--M5) before optional ablations; reduce exploratory seeds after
+pilot runs; freeze scope after an agreed milestone.
+\item[R3 --- Implementation or configuration error affecting validity]
+$L{=}2$, $C{=}4$, $R{=}8$ (significant). Mitigation: fixed random seeds and
+\texttt{config.yaml}; version control; spot-check metrics against baselines;
+retain aggregation scripts for reproducibility.
+\item[R4 --- Dependency or environment drift]
+$L{=}2$, $C{=}2$, $R{=}4$ (moderate). Mitigation: pin dependencies; record Python
+and package versions; rerun smoke tests before final data collection.
+\end{description}
+
+Malfunctioning software (crashes mid-experiment) is treated as a moderate
+operational risk: logging, smaller batches, and resumable scripts where applicable.
+
+\subsection*{2. Risks of harm to people and/or animals}
+
+The project is \emph{computational}: simulation and API-based inference only;
+there are no human participants, animals, or field trials. Residual ergonomics
+risk from prolonged screen work is rated $L=3$, $C=1$, $R=3$ (low), mitigated by
+regular breaks. No further institutional ethics procedures apply beyond normal
+safe computing practice.
+
+\subsection*{3. Environmental impact}
+
+\textbf{Energy and emissions.} Training PPO and running experiments uses local
+CPU/GPU electricity; LLM calls use remote data-centre energy. We rate avoidable
+extra compute and API calls at $L=3$, $C=1$, $R=3$ (low): pilot before large
+sweeps, avoid redundant invocations, reuse cached decisions where possible.
+
+\textbf{Waste and hardware.} No chemical or radioactive waste; no dedicated
+hardware beyond a standard workstation; end-of-life equipment follows
+institutional recycling.
+
+\subsection*{4. Financial loss}
+
+The main exposure is pay-per-use cloud LLM charges at scale. Uncontrolled seeds,
+episodes, or debugging runs can inflate cost ($L=4$, $C=2$, $R=8$, significant).
+Mitigation: budget cap, monitor token usage, temperature zero to limit retries,
+cheaper or offline models for dry-run debugging. No contractual liability to
+third parties arises from the simulation-only scope.
+
+\subsection*{Summary}
+
+The highest-priority contingencies are (i) experiments remaining feasible when
+the LLM API is constrained, (ii) calendar and API budget control so core
+comparisons finish on time, and (iii) validity through configuration control and
+sanity checks. Human, animal, and acute environmental harm are negligible for
+this software-only study; energy and API cost are managed as low-to-moderate
+concerns.
