@@ -2,17 +2,18 @@
 {\fontsize{16pt}{30pt}\selectfont \noindent\textbf{摘要}}
 \vspace{0.7cm}
 {\fontsize{12pt}{18pt}\selectfont
-% replace the paragraph below with your abstract
 
-This is the Chinese translation of the Abstract.
+5G网络切片技术允许异构服务在共享无线基础设施上共存，但在竞争性切片类型——增强移动宽带（eMBB）、超可靠低时延通信（URLLC）和大规模机器类通信（mMTC）——之间分配有限带宽仍然是一个具有挑战性的约束优化问题。本项目提出了一种基于大语言模型（LLM）多智能体协商的网络切片资源管理框架，其中三个专用切片管理智能体和一个全局协调智能体通过结构化的提案—评估—协商协议进行协作。为调和LLM推理延迟与无线调度实时性需求之间的矛盾，采用两层调度架构：上层执行低频多智能体LLM决策，下层以毫秒粒度执行缓存的分配策略。该框架使用LangGraph进行智能体编排，并在基于Gymnasium的自定义5G网络切片仿真环境中进行评估，该环境具有明确定义的状态空间、动作空间和SLA评估逻辑。两种协商策略——优先级仲裁和比例妥协——与四种基线方法（固定比例分配、阈值动态调整、近端策略优化和单智能体LLM）在稳态和突发流量场景下进行了比较，每种条件使用5个随机种子。实验结果表明，比例妥协变体在突发场景下的平均SLA满足率（0.606）与最优规则基线（0.612）具有竞争力，同时优于深度强化学习和单智能体LLM基线。协商机制相比无协商消融实验，将SLA满足率提高了约26\%，将公平性方差降低了约50\%，验证了多智能体协议的结构性价值。本文讨论了决策延迟（每步6--9秒）和令牌成本等局限性，并提出了包括边缘部署模型和LLM-RL混合方法在内的未来研究方向。
 
 }
 \vspace{1.0cm}
 {\fontsize{16pt}{30pt}\selectfont \noindent\textbf{关键词}}
 \vspace{0.7cm}
 {\fontsize{12pt}{18pt}\selectfont
-% replace the paragraph below with your keywords
 
-This is the Chinese translation of the Keywords, separated by commas and following the same sequence.
+网络切片, 资源管理, 大语言模型, 多智能体系统, 协商协议, 5G, 深度强化学习, 两层调度
 
 }
+
+%% ======== TEMPLATE GUIDANCE (retained per instructions) ========
+% This is the Chinese translation of the Abstract.

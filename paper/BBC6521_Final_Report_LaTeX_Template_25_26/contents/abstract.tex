@@ -6,7 +6,7 @@
 {\fontsize{12pt}{18pt}\selectfont
 % replace the paragraph below with your abstract
 
-The abstract should be a short overview of the whole report (200-300 words maximum). It should give the reader enough information about your entire project to know what you have tried to do and whether you were successful.
+5G network slicing enables the coexistence of heterogeneous services over a shared radio infrastructure, but allocating limited bandwidth among competing slice types --- Enhanced Mobile Broadband (eMBB), Ultra-Reliable Low-Latency Communication (URLLC) and massive Machine-Type Communication (mMTC) --- remains a challenging constrained optimisation problem. This project proposes a Large Language Model (LLM) multi-agent negotiation framework for network slice resource management, in which three specialised slice-manager agents and a global coordinator agent collaborate through a structured proposal--evaluation--negotiation protocol. To reconcile the inference latency of LLMs with the real-time demands of radio scheduling, a two-tier architecture is adopted: the upper tier executes low-frequency multi-agent LLM decisions while the lower tier enforces cached allocations at millisecond granularity. The framework is implemented using LangGraph for agent orchestration and evaluated in a custom Gymnasium-based 5G network slicing simulation environment with clearly defined state space, action space and SLA evaluation logic. Two negotiation strategies --- Priority Arbitration and Proportional Compromise --- are compared against four baselines (fixed-ratio allocation, threshold-based adjustment, Proximal Policy Optimisation, and single-agent LLM) across steady-state and burst traffic scenarios with five random seeds per condition. Experimental results show that the Proportional Compromise variant achieves average SLA satisfaction rates competitive with the best rule-based baseline (0.606 vs.\ 0.612 under burst) while outperforming the DRL and single-agent LLM baselines. The negotiation mechanism improves SLA satisfaction by approximately 26\% and reduces fairness variance by roughly 50\% compared to a no-negotiation ablation, confirming the structural value of the multi-agent protocol. Limitations including decision latency (6--9 seconds per step) and token cost are discussed, and directions for future work including edge-deployed models and hybrid LLM-RL approaches are identified.
 
 }
 \vspace{0.5cm}
@@ -14,10 +14,10 @@ The abstract should be a short overview of the whole report (200-300 words maxim
 {\fontsize{16pt}{30pt}\selectfont \noindent\textbf{Keywords}}
 \vspace{0.5cm}
 {\fontsize{12pt}{18pt}\selectfont
-% replace the paragraph below with your keywords
 
-Keyword 1, Keyword 2, Keyword 3 (List of Keywords, separated by commas)
+Network Slicing, Resource Management, Large Language Model, Multi-Agent System, Negotiation Protocol, 5G, Deep Reinforcement Learning, Two-Tier Scheduling
 
 }
 
-
+%% ======== TEMPLATE GUIDANCE (retained per instructions) ========
+% The abstract should be a short overview of the whole report (200-300 words maximum). It should give the reader enough information about your entire project to know what you have tried to do and whether you were successful.

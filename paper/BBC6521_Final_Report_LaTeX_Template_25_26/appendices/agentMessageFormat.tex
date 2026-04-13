@@ -3,21 +3,16 @@
 \addcontentsline{toc}{subsection}{Agent Message Format (JSON Schema)}
 
 \noindent
-This appendix summarises structured messages used by the LLM agents and the
-LangGraph orchestration layer, as implemented in
-\texttt{src/agents/slice\_agent.py},
-\texttt{src/agents/coordinator.py},
-\texttt{src/agents/single\_agent.py},
-\texttt{src/agents/multi\_agent\_graph.py}, and
-\texttt{src/environment/slicing\_env.py}.
+This appendix summarises the structured JSON messages exchanged between
+the LLM agents and the LangGraph orchestration layer.
 The environment's natural-language state is emitted in Chinese; field meanings
 below are given in English for clarity.
 
 \subsubsection*{Environment state description (natural language input)}
 
-Method \texttt{NetworkSlicingEnv.get\_state\_description()} builds a single
-string passed to every LLM call as \texttt{\{state\_description\}}. Each line
-has the following semantics (runtime text is Chinese; structure is fixed):
+The environment builds a single string passed to every LLM call as
+\texttt{\{state\_description\}}. Each line has the following semantics
+(runtime text is Chinese; structure is fixed):
 
 \begin{itemize}\setlength{\itemsep}{2pt}
   \item Header: current decision step index and total system bandwidth (MHz).
@@ -27,10 +22,10 @@ has the following semantics (runtime text is Chinese; structure is fixed):
         $[0,1]$.
 \end{itemize}
 
-\subsubsection*{Slice manager agent — proposal object}
+\subsubsection*{Slice manager agent --- proposal object}
 
-Parsed by \texttt{JsonOutputParser}; keys are normalised in
-\texttt{SliceAgent.\_validate}. Intended shape:
+Parsed by \texttt{JsonOutputParser}; keys are normalised before downstream use.
+Intended shape:
 
 \begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, frame=single]
 {
@@ -44,13 +39,11 @@ Parsed by \texttt{JsonOutputParser}; keys are normalised in
 
 \noindent
 The \texttt{slice} field is appended in code so downstream components always
-know the source slice. Defaults on parse failure are defined per slice in
-\texttt{DEFAULTS} (see source).
+know the source slice. Defaults on parse failure are defined per slice.
 
-\subsubsection*{Global coordinator agent — evaluation object}
+\subsubsection*{Global coordinator agent --- evaluation object}
 
-Returned by the coordinator LLM and validated in
-\texttt{CoordinatorAgent.\_validate}; allocation is renormalised to sum to~1.
+Returned by the coordinator LLM; allocation is renormalised to sum to~1.
 
 \begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, frame=single]
 {
@@ -66,17 +59,10 @@ Returned by the coordinator LLM and validated in
 
 \noindent
 When building the coordinator prompt, each proposal is flattened to one line of
-text for \texttt{\{proposals\_text\}}. The repository uses the following
-Chinese labels (equivalent English semantics in parentheses):
+text for \texttt{\{proposals\_text\}}, e.g.\
+\texttt{[eMBB] requested=0.xx, minimum=0.xx, priority=..., justification=...}.
 
-\begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, frame=single]
-[<slice>] 请求=<requested>, 最低=<minimum>, 优先级=<priority>, 理由=<justification>
-\end{lstlisting}
-\noindent
-English equivalent: each line lists slice name, requested fraction, minimum
-fraction, priority label, and justification string.
-
-\subsubsection*{Single-agent baseline (M4) — allocation object}
+\subsubsection*{Single-agent baseline (M4) --- allocation object}
 
 Direct mapping from JSON to the three-dimensional action (then clipped to
 $\geq 0.05$ and normalised):
@@ -87,8 +73,7 @@ $\geq 0.05$ and normalised):
 
 \subsubsection*{LangGraph multi-agent state (\texttt{MASState})}
 
-Typed dictionary carried across nodes in
-\texttt{src/agents/multi\_agent\_graph.py}:
+Typed dictionary carried across nodes in the LangGraph workflow:
 
 \begin{table}[h]
 \centering
@@ -104,13 +89,12 @@ List of slice proposal dicts (latest round). \\
 \texttt{coordinator\_result} &
 Coordinator evaluation dict; \texttt{compatible} drives routing. \\
 \texttt{negotiation\_round} &
-Integer; incremented after each \texttt{negotiation} node visit. \\
+Integer; incremented after each negotiation node visit. \\
 \texttt{max\_rounds} &
-Cap on negotiation iterations (default 3 in \texttt{build\_multi\_agent\_graph}). \\
+Cap on negotiation iterations (default 3). \\
 \texttt{strategy} &
 \texttt{"priority"} or \texttt{"proportional"}: selects
-\texttt{resolve\_by\_priority\_arbitration} vs.\
-\texttt{resolve\_by\_proportional\_compromise} in \texttt{src/negotiation/protocol.py}. \\
+Priority Arbitration vs.\ Proportional Compromise. \\
 \texttt{final\_allocation} &
 Final dict \texttt{\{"eMBB": float, "URLLC": float, "mMTC": float\}} passed to the env. \\
 \texttt{total\_tokens} &
@@ -124,13 +108,13 @@ Set when negotiation applies a resolution. \\
 \subsubsection*{Routing and final action}
 
 If \texttt{coordinator\_result.compatible} is true, the graph goes to
-\texttt{finalize} and uses the coordinator's \texttt{allocation}. Otherwise the
-\texttt{negotiation} node computes an allocation from the current
+the finalise node and uses the coordinator's \texttt{allocation}. Otherwise the
+negotiation node computes an allocation from the current
 \texttt{proposals} using the selected strategy; the graph may loop back to slice
 agents until \texttt{negotiation\_round >= max\_rounds} or resolution. The
-\texttt{finalize} node outputs a dict with keys \texttt{eMBB}, \texttt{URLLC},
+finalise node outputs a dict with keys \texttt{eMBB}, \texttt{URLLC},
 \texttt{mMTC} (floats, interpreted as fractions, then clipped and
 renormalised to sum to~1).
 
-The no-negotiation variant (\texttt{M5-no-neg}) omits the negotiation loop; the
+The no-negotiation variant (M5-no-neg) omits the negotiation loop; the
 final action is taken from the coordinator's \texttt{allocation} only.

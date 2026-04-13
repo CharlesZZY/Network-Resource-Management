@@ -3,10 +3,8 @@
 \addcontentsline{toc}{subsection}{Prompt Templates for Each Agent Role}
 
 \noindent
-The following templates correspond to the implementation in
-\texttt{src/agents/slice\_agent.py},
-\texttt{src/agents/coordinator.py}, and
-\texttt{src/agents/single\_agent.py}.
+The following templates are used by the slice manager agents, the global
+coordinator agent, and the single-agent LLM baseline.
 The running code uses Chinese wording; this appendix gives faithful English
 translations for the report.
 Placeholders in braces are filled at runtime by LangChain
@@ -36,7 +34,7 @@ communication (IoT sensor networks).
 SLA: access success rate >= 95%.
 \end{lstlisting}
 
-\subsubsection*{Slice manager — initial proposal (system + human)}
+\subsubsection*{Slice manager --- initial proposal (system + human)}
 
 \begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, frame=single]
 [System]
@@ -45,7 +43,8 @@ SLA: access success rate >= 95%.
 Use chain-of-thought reasoning on the current slice state, then output a
 JSON resource request proposal.
 Output JSON only (no other text):
-{"requested": 0.xx, "minimum": 0.xx, "priority": "high/medium/low", "justification": "brief reason"}
+{"requested": 0.xx, "minimum": 0.xx, "priority": "high/medium/low",
+ "justification": "brief reason"}
 
 [Human]
 Current network state:
@@ -54,15 +53,16 @@ Current network state:
 Propose a resource request for the {slice_name} slice.
 \end{lstlisting}
 
-\subsubsection*{Slice manager — counter-proposal after coordinator feedback}
+\subsubsection*{Slice manager --- counter-proposal after coordinator feedback}
 
 \begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, frame=single]
 [System]
 {system_prompt}
 
-Adjust your resource request using the coordinator feedback. Output JSON only
-(no other text):
-{"requested": 0.xx, "minimum": 0.xx, "priority": "high/medium/low", "justification": "brief reason"}
+Adjust your resource request using the coordinator feedback. Output JSON
+only (no other text):
+{"requested": 0.xx, "minimum": 0.xx, "priority": "high/medium/low",
+ "justification": "brief reason"}
 
 [Human]
 Current network state:
@@ -83,14 +83,18 @@ cross-slice resource coordination.
 
 Responsibilities:
 1. Collect resource proposals from each slice agent
-2. Check global constraints (bandwidth fractions sum to 1.0; minimum 0.05 per slice)
-3. Decide whether proposals are compatible (whether total demand exceeds capacity)
+2. Check global constraints (bandwidth fractions sum to 1.0;
+   minimum 0.05 per slice)
+3. Decide whether proposals are compatible (whether total demand
+   exceeds capacity)
 4. If there is conflict, propose an allocation
 
 Priority order: URLLC > eMBB > mMTC
 
 Output JSON only (no other text):
-{"compatible": true/false, "allocation": {"eMBB": 0.xx, "URLLC": 0.xx, "mMTC": 0.xx}, "feedback": "rationale or per-slice feedback"}
+{"compatible": true/false,
+ "allocation": {"eMBB": 0.xx, "URLLC": 0.xx, "mMTC": 0.xx},
+ "feedback": "rationale or per-slice feedback"}
 
 [Human]
 Current network state:
@@ -113,16 +117,16 @@ slice, e.g.\
 
 \begin{lstlisting}[basicstyle=\footnotesize\ttfamily, breaklines=true, columns=fullflexible, frame=single]
 [System]
-You are a 5G network slicing resource expert. Given the current network state,
-assign bandwidth fractions to the three slices.
+You are a 5G network slicing resource expert. Given the current network
+state, assign bandwidth fractions to the three slices.
 
 SLA requirements:
 - eMBB: average user throughput >= 50 Mbps
 - URLLC: 99th percentile queuing delay <= 10% of eMBB delay
 - mMTC: access success rate >= 95%
 
-Constraints: three fractions sum to 1.0; minimum 0.05 per slice; priority
-URLLC > eMBB > mMTC
+Constraints: three fractions sum to 1.0; minimum 0.05 per slice;
+priority URLLC > eMBB > mMTC
 
 After chain-of-thought analysis, output JSON only (no other text):
 {"eMBB": 0.xx, "URLLC": 0.xx, "mMTC": 0.xx}

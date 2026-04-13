@@ -1,3 +1,80 @@
 \subsection*{Simulation Environment Parameters}
 \phantomsection
 \addcontentsline{toc}{subsection}{Simulation Environment Parameters}
+
+\noindent
+Table~\ref{tab:sim-full} lists all configurable parameters of the Gymnasium-based
+simulation environment, their values used in the experiments reported in
+Chapter~4, and their provenance in the configuration file
+\texttt{config.yaml}.
+
+\begin{table}[h]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\caption{Full simulation parameter listing.}
+\label{tab:sim-full}
+\begin{tabular}{@{}p{4.5cm}p{3.5cm}p{6.5cm}@{}}
+\hline
+\textbf{Parameter} & \textbf{Value} & \textbf{Description} \\
+\hline
+\multicolumn{3}{@{}l}{\emph{Environment (Section \texttt{environment})}} \\
+\hline
+\texttt{total\_bandwidth\_mhz} & 100 & Total system bandwidth (MHz). \\
+\texttt{max\_users} & 100 & Upper bound on user count per slice. \\
+\texttt{num\_slices} & 3 & Number of slice types. \\
+\texttt{slice\_names} & [eMBB, URLLC, mMTC] & Ordered slice identifiers. \\
+\texttt{arrival\_rates} & [50, 30, 20] & Poisson mean arrivals per step. \\
+\texttt{burst\_cycle} & 50 & Steps between burst toggles. \\
+\texttt{burst\_multiplier} & 2.0 & eMBB arrival rate multiplier during burst. \\
+\texttt{min\_allocation} & 0.05 & Minimum bandwidth fraction per slice. \\
+\texttt{cqi\_means} & [9, 10, 7] & Long-run mean CQI per slice. \\
+\texttt{cqi\_reversion\_rate} & 0.15 & AR(1) mean-reversion coefficient. \\
+\texttt{cqi\_noise\_std} & 1.2 & Gaussian noise standard deviation for CQI. \\
+\hline
+\multicolumn{3}{@{}l}{\emph{SLA Thresholds (Section \texttt{sla})}} \\
+\hline
+\texttt{embb\_throughput\_mbps} & 50 & eMBB: minimum average throughput (Mbps). \\
+\texttt{urllc\_delay\_ratio} & 0.1 & URLLC: 99th-\%ile delay $\leq$ this fraction of eMBB delay. \\
+\texttt{mMTC\_access\_rate} & 0.95 & mMTC: minimum access success rate. \\
+\hline
+\multicolumn{3}{@{}l}{\emph{Reward Weights (Section \texttt{reward})}} \\
+\hline
+\texttt{w\_sla} & 0.5 & Weight for SLA satisfaction term. \\
+\texttt{w\_util} & 0.3 & Weight for bandwidth utilisation term. \\
+\texttt{w\_violation} & 0.2 & Weight for SLA violation penalty term. \\
+\hline
+\multicolumn{3}{@{}l}{\emph{Experiment (Section \texttt{experiment})}} \\
+\hline
+\texttt{num\_cycles} & 100 & Decision steps per episode. \\
+\texttt{num\_seeds} & 5 & Number of random seeds. \\
+\texttt{seeds} & [42, 123, 456, 789, 1024] & Seed list. \\
+\texttt{scenarios} & [steady, burst] & Traffic scenarios evaluated. \\
+\hline
+\multicolumn{3}{@{}l}{\emph{LLM (Section \texttt{llm})}} \\
+\hline
+\texttt{temperature} & 0 & Sampling temperature (deterministic). \\
+\texttt{max\_retries} & 3 & API retry count on failure. \\
+\texttt{timeout\_seconds} & 30 & Per-call timeout (seconds). \\
+\texttt{max\_negotiation\_rounds} & 3 & Maximum negotiation iterations. \\
+\hline
+\multicolumn{3}{@{}l}{\emph{PPO (Section \texttt{ppo})}} \\
+\hline
+\texttt{learning\_rate} & $3 \times 10^{-4}$ & Adam learning rate. \\
+\texttt{n\_steps} & 1024 & Steps per rollout buffer. \\
+\texttt{batch\_size} & 64 & Mini-batch size. \\
+\texttt{n\_epochs} & 10 & Epochs per PPO update. \\
+\texttt{gamma} & 0.99 & Discount factor. \\
+\texttt{max\_episodes} & 2000 & Maximum training episodes. \\
+\texttt{early\_stop\_window} & 100 & Window for early-stopping criterion. \\
+\texttt{early\_stop\_threshold} & 0.005 & Improvement threshold for early stopping. \\
+\texttt{burst\_prob} & 0.4 & Probability of burst scenario during training. \\
+\hline
+\multicolumn{3}{@{}l}{\emph{Baseline (Section \texttt{baseline})}} \\
+\hline
+\texttt{fixed\_ratio} & [0.5, 0.3, 0.2] & M1 fixed allocation (eMBB, URLLC, mMTC). \\
+\texttt{threshold\_sla} & 0.8 & M2 SLA satisfaction trigger. \\
+\texttt{threshold\_transfer} & 0.05 & M2 bandwidth transfer increment. \\
+\hline
+\end{tabular}
+\end{table}

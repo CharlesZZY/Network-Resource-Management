@@ -2,14 +2,295 @@
 \setcounter{section}{4} \setcounter{subsection}{0}
 \phantomsection \addcontentsline{toc}{section}{\textit{Chapter 4: Results and Discussion}}
 
+This chapter presents and analyses the experimental results. Section~4.1 describes the experimental design and evaluation metrics. Section~4.2 reports the core performance comparison across all six methods (Experiment~1, addressing RQ1). Section~4.3 presents the negotiation mechanism validation (Experiment~2, addressing RQ2). Section~4.4 provides a consolidated analysis of the results. Section~4.5 discusses threats to validity and limitations. Section~4.6 considers practical implications.
+
 \subsection{Experimental Design and Evaluation Metrics}
 
-\subsection{Core Performance Comparison}
+\subsubsection{Experimental Configuration}
 
-\subsection{Negotiation Mechanism Validation}
+All experiments share a common configuration. The simulation environment uses 100\,MHz total bandwidth with three slice types (eMBB, URLLC, mMTC). Each episode runs for 100~decision cycles. Five random seeds (42, 123, 456, 789, 1024) are used for each method--scenario combination, and two traffic scenarios (steady-state and burst) are evaluated. The LLM temperature is fixed at~0 to limit variability to the environment's stochastic dynamics. Table~\ref{table:expconfig} summarises the full experimental configuration.
+
+\begin{table}[h]
+  \centering
+  \begin{spacing}{1.35}
+  \caption{Experimental configuration.}\vspace{0.7em}
+  \label{table:expconfig}
+    \begin{tabular}{|p{5.5cm}|p{8cm}|}
+    \hline
+    \textbf{Parameter} & \textbf{Setting} \\
+    \hline
+    System bandwidth & 100 MHz \\
+    \hline
+    Slice types & eMBB / URLLC / mMTC \\
+    \hline
+    User scale & Up to 100 users per cycle \\
+    \hline
+    Decision cycles per episode & 100 \\
+    \hline
+    Random seeds & 5 (42, 123, 456, 789, 1024) \\
+    \hline
+    Traffic scenarios & Steady-state; Burst (eMBB $\lambda$ doubles at cycle 50) \\
+    \hline
+    LLM temperature & 0 \\
+    \hline
+    Maximum negotiation rounds & 3 \\
+    \hline
+    \end{tabular}
+  \end{spacing}
+\end{table}
+
+\subsubsection{Evaluation Metrics}
+
+Six metrics are used to evaluate each method, as defined in Table~\ref{table:metrics}.
+
+\begin{table}[h]
+  \centering
+  \begin{spacing}{1.35}
+  \caption{Evaluation metrics and computation definitions.}\vspace{0.7em}
+  \label{table:metrics}
+    \begin{tabular}{|p{4cm}|p{9.5cm}|}
+    \hline
+    \textbf{Metric} & \textbf{Computation} \\
+    \hline
+    Per-slice SLA satisfaction rate & Proportion of decision cycles in which the slice's SLA condition is met, averaged over the episode \\
+    \hline
+    Weighted total throughput & Sum of all user throughputs across slices (Mbps) \\
+    \hline
+    Bandwidth utilisation & Ratio of actual demand-driven load to total system bandwidth \\
+    \hline
+    Inter-slice fairness & Jain's fairness index~\cite{jain1984fairness} computed on the per-slice SLA satisfaction rates \\
+    \hline
+    Per-decision latency & Wall-clock time from state input to allocation output (seconds) \\
+    \hline
+    Token consumption & Total tokens consumed per episode (input + output), for LLM-based methods \\
+    \hline
+    \end{tabular}
+  \end{spacing}
+\end{table}
+
+\subsubsection{Experiment Design}
+
+\textbf{Experiment~1 (Core Performance Comparison --- RQ1):} Methods M1 through M5-PC are run under both steady-state and burst scenarios with 5~seeds each, yielding 60~episode-level data points. The aim is to quantify the performance differences between the multi-agent LLM framework and established baselines.
+
+\textbf{Experiment~2 (Negotiation Mechanism Validation --- RQ2):} The three multi-agent variants --- M5-PA, M5-PC and M5-NoNeg (no negotiation) --- are compared under both scenarios with 5~seeds each, yielding 30~episode-level data points. The aim is to isolate the contribution of the negotiation mechanism from the effect of additional LLM computation.
+
+\subsection{Core Performance Comparison (Experiment 1)}
+
+\subsubsection{Overall Performance}
+
+Table~\ref{table:exp1main} presents the mean and standard deviation of the key metrics across all methods and scenarios. The results reveal several noteworthy patterns.
+
+\begin{table}[h]
+  \centering
+  \begin{spacing}{1.2}
+  \caption{Experiment~1: Core performance comparison (mean $\pm$ std over 5 seeds).}\vspace{0.7em}
+  \label{table:exp1main}
+  \footnotesize
+    \begin{tabular}{|p{1.6cm}|p{1.2cm}|p{1.5cm}|p{1.6cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.6cm}|}
+    \hline
+    \textbf{Method} & \textbf{Scenario} & \textbf{SLA Avg} & \textbf{Throughput (Mbps)} & \textbf{BW Util} & \textbf{Fairness} & \textbf{Latency (s)} & \textbf{Tokens/ep} \\
+    \hline
+    M1-Fixed & burst & .612$\pm$.029 & 4769$\pm$218 & .760$\pm$.006 & .819$\pm$.067 & 0 & 0 \\
+    \hline
+    M1-Fixed & steady & .617$\pm$.040 & 4617$\pm$254 & .538$\pm$.010 & .899$\pm$.072 & 0 & 0 \\
+    \hline
+    M2-Thres & burst & .399$\pm$.027 & 4467$\pm$325 & .760$\pm$.006 & .923$\pm$.034 & 0 & 0 \\
+    \hline
+    M2-Thres & steady & .491$\pm$.020 & 4379$\pm$212 & .538$\pm$.010 & .956$\pm$.023 & 0 & 0 \\
+    \hline
+    M3-PPO & burst & .515$\pm$.027 & 4651$\pm$222 & .760$\pm$.006 & .890$\pm$.033 & $<$0.001 & 0 \\
+    \hline
+    M3-PPO & steady & .499$\pm$.015 & 4350$\pm$262 & .538$\pm$.010 & .950$\pm$.035 & $<$0.001 & 0 \\
+    \hline
+    M4-Single & burst & .481$\pm$.037 & 5074$\pm$267 & .760$\pm$.006 & .645$\pm$.071 & 5.79$\pm$2.46 & 26244 \\
+    \hline
+    M4-Single & steady & .500$\pm$.036 & 4940$\pm$332 & .538$\pm$.010 & .726$\pm$.036 & 8.87$\pm$0.24 & 26124 \\
+    \hline
+    M5-PA & burst & .389$\pm$.029 & 5549$\pm$365 & .760$\pm$.006 & .513$\pm$.060 & 6.65$\pm$1.58 & 124838 \\
+    \hline
+    M5-PA & steady & .413$\pm$.022 & 5336$\pm$404 & .538$\pm$.010 & .613$\pm$.048 & 8.07$\pm$0.11 & 124938 \\
+    \hline
+    M5-PC & burst & .606$\pm$.021 & 4650$\pm$176 & .760$\pm$.006 & .794$\pm$.055 & 6.63$\pm$1.48 & 125348 \\
+    \hline
+    M5-PC & steady & .585$\pm$.037 & 4635$\pm$232 & .538$\pm$.010 & .865$\pm$.065 & 7.94$\pm$0.19 & 125244 \\
+    \hline
+    \end{tabular}
+  \end{spacing}
+\end{table}
+
+\subsubsection{Per-Slice SLA Satisfaction}
+
+Figure~\ref{fig:exp1sla} presents the per-slice SLA satisfaction rates for each method under both scenarios. The results show distinct allocation strategies across methods.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/exp1_sla_comparison.png}
+    \caption{Experiment~1: Per-slice SLA satisfaction rates by method and scenario.}
+    \label{fig:exp1sla}
+\end{figure}
+
+The LLM-based methods (M4, M5-PA) consistently achieve high URLLC SLA satisfaction (0.87--0.97 across scenarios), reflecting the priority encoding in their system prompts. However, this comes at the cost of lower eMBB and mMTC satisfaction, particularly for M5-PA which achieves only 0.074 eMBB satisfaction under burst conditions. By contrast, M5-PC achieves a more balanced distribution across slices (eMBB: 0.178, URLLC: 0.870, mMTC: 0.770 under burst), comparable to the rule-based M1-Fixed baseline.
+
+M1-Fixed achieves the highest average SLA (0.612 burst, 0.617 steady) despite its simplicity, because its fixed 5:3:2 ratio happens to allocate a relatively generous share to eMBB and mMTC, which are the most bandwidth-demanding slices in the simulation. M2-Threshold, while achieving the highest fairness scores (0.923 burst, 0.956 steady), suffers from lower overall SLA satisfaction because its reactive bandwidth transfers can overshoot, destabilising allocations under dynamic conditions.
+
+\subsubsection{Burst Scenario Adaptation}
+
+Figure~\ref{fig:exp1burst} shows the time-series evolution of the average SLA satisfaction rate under the burst scenario, with the burst event occurring at cycle~50.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/exp1_burst_trend.png}
+    \caption{Experiment~1: Average SLA satisfaction trend under burst scenario (burst onset at cycle 50, marked by dashed line).}
+    \label{fig:exp1burst}
+\end{figure}
+
+Following the burst onset, all methods experience a decline in average SLA satisfaction, reflecting the increased pressure on eMBB resources. M1-Fixed and M5-PC show relatively stable post-burst behaviour, while M2-Threshold exhibits more oscillatory responses as its reactive mechanism attempts to track the new demand pattern. The LLM-based methods (M4, M5) show varying degrees of adaptation, with their responses shaped by the reasoning encoded in their prompts rather than by learned or hard-coded rules.
+
+\subsubsection{Performance Overview}
+
+Figure~\ref{fig:exp1overview} provides a comprehensive view of additional metrics including throughput, bandwidth utilisation, fairness, decision latency and token consumption.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/exp1_performance_overview.png}
+    \caption{Experiment~1: Performance overview across metrics and scenarios.}
+    \label{fig:exp1overview}
+\end{figure}
+
+Bandwidth utilisation is effectively identical across all methods within each scenario (0.760 for burst, 0.538 for steady), as this metric is determined by the user demand profile rather than the allocation strategy. Throughput varies more substantially: M5-PA achieves the highest throughput (5549\,Mbps under burst) due to its aggressive allocation towards high-priority slices, while M2-Threshold produces the lowest (4467\,Mbps under burst). The LLM-based methods incur substantial decision latencies (5.8--8.9 seconds per step), compared to effectively zero for rule-based methods and negligible latency for PPO. Token consumption is approximately 26{,}000 per episode for M4 and 125{,}000 for M5 variants, reflecting the additional LLM calls in the multi-agent framework.
+
+\subsection{Negotiation Mechanism Validation (Experiment 2)}
+
+\subsubsection{Comparison of Multi-Agent Variants}
+
+Table~\ref{table:exp2} compares the three multi-agent variants: M5-PA (Priority Arbitration), M5-PC (Proportional Compromise) and M5-NoNeg (no negotiation, coordinator-only allocation).
+
+\begin{table}[h]
+  \centering
+  \begin{spacing}{1.2}
+  \caption{Experiment~2: Multi-agent variant comparison (mean $\pm$ std over 5 seeds).}\vspace{0.7em}
+  \label{table:exp2}
+  \footnotesize
+    \begin{tabular}{|p{1.8cm}|p{1.2cm}|p{1.5cm}|p{1.6cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.6cm}|}
+    \hline
+    \textbf{Method} & \textbf{Scenario} & \textbf{SLA Avg} & \textbf{Throughput (Mbps)} & \textbf{BW Util} & \textbf{Fairness} & \textbf{Latency (s)} & \textbf{Tokens/ep} \\
+    \hline
+    M5-NoNeg & burst & .481$\pm$.046 & 4855$\pm$252 & .760$\pm$.006 & .780$\pm$.104 & 6.51$\pm$1.47 & 125398 \\
+    \hline
+    M5-NoNeg & steady & .463$\pm$.079 & 4840$\pm$320 & .538$\pm$.010 & .837$\pm$.021 & 8.14$\pm$0.38 & 125512 \\
+    \hline
+    M5-PA & burst & .389$\pm$.029 & 5549$\pm$365 & .760$\pm$.006 & .513$\pm$.060 & 6.65$\pm$1.58 & 124838 \\
+    \hline
+    M5-PA & steady & .413$\pm$.022 & 5336$\pm$404 & .538$\pm$.010 & .613$\pm$.048 & 8.07$\pm$0.11 & 124938 \\
+    \hline
+    M5-PC & burst & .606$\pm$.021 & 4650$\pm$176 & .760$\pm$.006 & .794$\pm$.055 & 6.63$\pm$1.48 & 125348 \\
+    \hline
+    M5-PC & steady & .585$\pm$.037 & 4635$\pm$232 & .538$\pm$.010 & .865$\pm$.065 & 7.94$\pm$0.19 & 125244 \\
+    \hline
+    \end{tabular}
+  \end{spacing}
+\end{table}
+
+\subsubsection{Fairness Comparison}
+
+Figure~\ref{fig:exp2fairness} compares the Jain's fairness index across the three variants. M5-PC consistently achieves higher fairness than M5-PA, with the gap being more pronounced under burst conditions ($0.794$ vs.\ $0.513$). M5-NoNeg falls between the two negotiation strategies in terms of fairness ($0.780$ under burst), though with considerably higher variance ($\pm 0.104$).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/exp2_fairness_comparison.png}
+    \caption{Experiment~2: Jain's fairness index comparison across multi-agent variants.}
+    \label{fig:exp2fairness}
+\end{figure}
+
+\subsubsection{Per-Slice SLA Analysis}
+
+Figure~\ref{fig:exp2sla} shows the per-slice SLA satisfaction rates for the three variants, revealing the mechanisms by which each achieves its aggregate performance.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/exp2_sla_per_slice.png}
+    \caption{Experiment~2: Per-slice SLA satisfaction rates for multi-agent variants.}
+    \label{fig:exp2sla}
+\end{figure}
+
+M5-PA achieves the highest URLLC satisfaction (0.920 under burst) but the lowest mMTC satisfaction (0.172), reflecting the strict priority ordering that favours URLLC at the expense of lower-priority slices. M5-PC distributes resources more equitably, achieving mMTC satisfaction of 0.770 while maintaining URLLC at 0.870. M5-NoNeg shows intermediate performance but with substantially higher variance, indicating that the coordinator's one-shot allocation is less predictable than the structured negotiation outcomes.
+
+\subsubsection{Performance Overview}
+
+Figure~\ref{fig:exp2overview} shows the remaining performance metrics for the three variants.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.95\textwidth]{figures/exp2_performance_overview.png}
+    \caption{Experiment~2: Performance overview for multi-agent variants.}
+    \label{fig:exp2overview}
+\end{figure}
+
+Token consumption is comparable across all three variants (approximately 125{,}000 per episode), confirming that the negotiation mechanism does not substantially increase the computational cost relative to the no-negotiation baseline. Decision latencies are also similar (6.5--8.1 seconds), as the dominant cost is the LLM API calls for the three slice agents and the coordinator, which are present in all variants.
 
 \subsection{Result Analysis}
 
+\subsubsection{Addressing RQ1: Multi-Agent LLM vs.\ Baselines}
+
+The experimental results present a nuanced picture regarding RQ1. Contrary to the initial hypothesis, the multi-agent LLM framework does not uniformly outperform all baselines across all metrics. The specific findings are:
+
+\begin{enumerate}
+    \item \textbf{SLA satisfaction:} M5-PC achieves the second-highest average SLA satisfaction (0.606 burst, 0.585 steady), competitive with M1-Fixed (0.612 burst, 0.617 steady) and outperforming M3-PPO (0.515 burst, 0.499 steady) and M4 (0.481 burst, 0.500 steady). However, M5-PA underperforms most baselines due to its aggressive prioritisation of URLLC.
+
+    \item \textbf{Throughput:} LLM-based methods generally achieve higher total throughput than rule-based methods, with M5-PA reaching the highest values (5549\,Mbps). This can be attributed to more aggressive allocation decisions that concentrate resources on high-capacity slices.
+
+    \item \textbf{Fairness:} Rule-based methods (M2-Threshold in particular, with fairness 0.923--0.956) generally achieve higher inter-slice fairness than LLM-based methods. Among the LLM methods, M5-PC achieves the best fairness (0.794--0.865), approaching but not exceeding the rule-based baselines.
+
+    \item \textbf{Operational cost:} LLM-based methods incur substantial decision latencies (5.8--8.9 seconds) and token costs (26{,}000--125{,}000 per episode), which represent significant practical constraints that rule-based and DRL methods do not share.
+\end{enumerate}
+
+These findings suggest that the choice of negotiation strategy is critical: M5-PC, with its proportional compromise approach, achieves competitive SLA satisfaction and reasonable fairness, while M5-PA's strict priority arbitration creates significant imbalances. The advantage of the multi-agent framework lies not in uniformly superior performance, but in its ability to reason about trade-offs between competing slice objectives in a more interpretable and configurable manner than monolithic approaches.
+
+\subsubsection{Addressing RQ2: Value of the Negotiation Mechanism}
+
+The comparison of M5-PC, M5-PA and M5-NoNeg provides evidence for the structural contribution of the negotiation mechanism:
+
+\begin{enumerate}
+    \item M5-PC outperforms M5-NoNeg in average SLA satisfaction under both scenarios (0.606 vs.\ 0.481 under burst; 0.585 vs.\ 0.463 under steady), representing a relative improvement of approximately 26\%.
+
+    \item M5-NoNeg exhibits substantially higher variance in fairness ($\pm 0.104$ under burst) compared to M5-PC ($\pm 0.055$), indicating that the negotiation mechanism produces more consistent outcomes.
+
+    \item The token consumption and latency of M5-NoNeg are comparable to those of M5-PC, confirming that the performance differences are attributable to the negotiation protocol rather than to additional computation.
+
+    \item The choice between PA and PC negotiation strategies has a larger effect on performance than the presence or absence of negotiation itself, highlighting the importance of protocol design.
+\end{enumerate}
+
+The negotiation mechanism, when combined with the Proportional Compromise strategy, provides measurable benefits in both SLA satisfaction and outcome consistency. The Priority Arbitration strategy, while effective for URLLC protection, does not yield balanced improvements across slices.
+
 \subsection{Threats to Validity and Limitations}
 
+Several factors may affect the generalisability of the reported results:
+
+\begin{itemize}
+    \item \textbf{Simulation fidelity:} The environment uses simplified models for channel quality, throughput and SLA evaluation. Real-world network conditions involve more complex propagation effects, multi-cell interference and non-stationary traffic patterns that are not captured by the Poisson arrival model used here.
+
+    \item \textbf{Scale of evaluation:} Each condition is evaluated with 5~random seeds, which limits the statistical power of comparisons. While the observed trends are consistent across seeds, larger-scale experiments would strengthen confidence in the findings.
+
+    \item \textbf{LLM sensitivity:} The results depend on the specific LLM used (GPT-4 series) and may differ with other models. The temperature-0 setting reduces but does not eliminate stochastic variability in LLM outputs, and the prompt templates have not been optimised through systematic ablation.
+
+    \item \textbf{Decision latency:} The per-step latencies of 5.8--8.9 seconds observed for LLM-based methods substantially exceed the 2-second threshold assumed in the two-tier design. In a real deployment, this would require either faster models, parallel API calls, or a larger decision interval.
+
+    \item \textbf{Token cost:} The multi-agent framework consumes approximately 125{,}000 tokens per episode, which, at current API pricing, represents a non-trivial operational cost that scales with the number of decision cycles.
+\end{itemize}
+
 \subsection{Practical Implications}
+
+The experimental results suggest several practical considerations for deploying LLM-based resource management in real networks:
+
+\begin{itemize}
+    \item The Proportional Compromise negotiation strategy (M5-PC) achieves SLA satisfaction and fairness levels competitive with established baselines while offering superior interpretability through natural-language justifications and structured proposal exchanges.
+
+    \item The choice of negotiation strategy has a larger impact on performance than the number of LLM agents or the number of negotiation rounds, suggesting that protocol design should be prioritised in future work.
+
+    \item The substantial decision latencies observed (6--9 seconds per step) indicate that current LLM API infrastructure is not yet suitable for real-time network control at the timescales assumed in this work. Local or edge-deployed models, quantised inference, or hybrid LLM-RL approaches may be needed to bridge this gap.
+
+    \item The interpretability advantage of LLM-based methods --- where each agent produces a natural-language justification for its proposal --- may be particularly valuable in regulated environments where allocation decisions must be auditable.
+\end{itemize}
+
+%% ======== TEMPLATE GUIDANCE (retained per instructions) ========
+% Most projects will have results, especially for a research project. But again you should talk to your supervisor about it.

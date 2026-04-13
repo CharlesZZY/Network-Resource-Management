@@ -4,6 +4,53 @@
 
 \subsection{Conclusion}
 
+This project set out to design, implement and evaluate an LLM multi-agent negotiation framework for 5G network slice resource management, guided by two research questions. The conclusions drawn from the experimental results are summarised below.
+
+\textbf{RQ1: Can a multi-agent LLM framework match or exceed the performance of traditional rule-based strategies and DRL methods?} The results show that the multi-agent framework with Proportional Compromise negotiation (M5-PC) achieves average SLA satisfaction rates competitive with the best-performing baselines (0.606 under burst, compared to 0.612 for M1-Fixed), while outperforming the PPO baseline (0.515) and the single-agent LLM (0.481) under burst conditions. However, no single LLM-based method uniformly dominates all baselines across all metrics. The M5-PA variant, using Priority Arbitration, achieves the highest throughput but at the cost of substantial fairness degradation. These findings indicate that the multi-agent LLM framework can be competitive with established methods, but its effectiveness is highly dependent on the choice of negotiation strategy.
+
+\textbf{RQ2: Does the structured negotiation mechanism provide measurable advantages?} The comparison between M5-PC and M5-NoNeg demonstrates that the Proportional Compromise negotiation protocol improves average SLA satisfaction by approximately 26\% under burst conditions (0.606 vs.\ 0.481) and reduces outcome variance in fairness by roughly 50\% ($\pm 0.055$ vs.\ $\pm 0.104$). These improvements are achieved without additional token consumption, confirming that the negotiation protocol provides structural benefits beyond simply performing more LLM computations. The Protocol design matters considerably: Priority Arbitration (M5-PA) reduces overall fairness relative to the no-negotiation variant, illustrating that not all negotiation strategies are beneficial.
+
+Beyond the direct answers to the research questions, this project has delivered three tangible outputs: (1)~a reproducible Gymnasium-based simulation environment for 5G network slicing with clearly defined state space, action space and SLA evaluation logic; (2)~a two-tier scheduling framework that decouples LLM reasoning from real-time execution; and (3)~a systematic empirical comparison of six resource allocation methods across two traffic scenarios, providing a baseline for future work in this area.
+
 \subsection{Reflection}
 
+This project has been a substantial learning experience across several dimensions. From a technical perspective, implementing the multi-agent LLM framework required integrating skills in reinforcement learning (for the PPO baseline and environment design), prompt engineering (for the agent system prompts), and distributed system design (for the LangGraph orchestration). Working with commercial LLM APIs introduced practical challenges not typically encountered in traditional software engineering, including non-deterministic outputs, rate limiting and the need for robust fallback mechanisms.
+
+The experimental results provided an important lesson in intellectual honesty. The initial hypothesis that the multi-agent framework would uniformly outperform all baselines was not supported by the data. Rather than attempting to frame the results in a more favourable light, the analysis was designed to present the findings objectively, acknowledging both the strengths and limitations of the proposed approach. This experience reinforced the importance of pre-registering hypotheses and contingency analyses, as outlined in the mid-term report.
+
+From a broader ethical perspective, the project raised considerations about the environmental cost of LLM inference. The multi-agent framework consumes approximately 125{,}000 tokens per episode, which, over multiple experimental runs, represents a non-trivial energy expenditure. This is a relevant concern for any LLM-based system intended for continuous network operation, and it motivated the inclusion of token consumption as an explicit evaluation metric.
+
+The project also highlighted the tension between interpretability and efficiency. While the LLM-based methods produce natural-language justifications for their decisions --- a clear advantage for auditability --- the decision latencies observed (6--9 seconds per step) are incompatible with real-time network control under current infrastructure. This trade-off between interpretability and operational viability is likely to remain a central challenge as LLM-based network management matures.
+
 \subsection{Further Work}
+
+Several directions for future work emerge from the limitations and findings of this project:
+
+\begin{itemize}
+    \item \textbf{Larger-scale and more realistic scenarios:} The current evaluation is limited to three slice types and 100 users. Extending to larger user populations, more slice types (e.g., vehicle-to-everything or augmented reality slices), and more complex traffic models (e.g., correlated arrivals, diurnal patterns) would test the scalability of the framework.
+
+    \item \textbf{Adaptive negotiation strategies:} The current implementation uses fixed negotiation strategies (PA or PC). A natural extension would be to allow the coordinator to select or blend strategies based on the current network state, potentially learning an optimal strategy selection policy through reinforcement learning or meta-learning.
+
+    \item \textbf{Edge-deployed or quantised models:} The decision latencies observed with cloud-based API calls suggest that deploying smaller, locally-hosted models could reduce latency to levels compatible with the two-tier design's assumptions. Evaluating the performance trade-off between model size and allocation quality would be informative.
+
+    \item \textbf{Online learning and continual adaptation:} Incorporating feedback from historical allocation outcomes into the agent prompts (e.g., through RAG or in-context learning) could enable the framework to adapt to long-term traffic trends without retraining.
+
+    \item \textbf{Real-network or high-fidelity simulation validation:} Deploying the framework on an O-RAN testbed or a high-fidelity simulator such as ns-3 would provide more realistic validation and expose challenges related to multi-cell coordination, handover and physical-layer effects.
+
+    \item \textbf{Hybrid LLM-RL approaches:} Combining the interpretability and reasoning capabilities of LLMs with the fast decision-making of trained RL policies --- for example, using the LLM framework to set high-level allocation targets that an RL agent refines at shorter timescales --- could offer the benefits of both paradigms.
+\end{itemize}
+
+%% ======== TEMPLATE GUIDANCE (retained per instructions) ========
+% The conclusion is an important part of the report, as it states what you have done for the project.
+%
+% \subsection{Conclusion}
+% It concludes the findings of your research or the outcome of implementing a system. A good conclusion will NOT repeat what you have done, but set out the achievements very crisply.
+%
+% \subsection{Reflection}
+% This chapter should include a reflection statement for your project. You should critically reflect upon the technical skills developed, new knowledge gained, and lessons learnt on the project journey. You should also include reflections on broader ethical, social, legal, and environmental issues, allied with good professional practice and behaviour you have adopted in conducting your project.
+%
+% \subsection{Further work}
+% Further work can be the next step of your research, or some functionality that can be added to the implementation to make it more practical.
+%
+% \vspace{\baselineskip}
+% \noindent\textbf{NOTE: The total length of the report up to this point should be between 30 and 50 pages.}
