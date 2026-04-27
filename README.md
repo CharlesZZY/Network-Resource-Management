@@ -2,6 +2,85 @@
 
 基于大语言模型多智能体系统的 5G 网络切片资源管理框架。
 
+## Overview
+
+This repository contains the simulation environment, multi-agent LLM framework, baseline methods and experiment scripts for the final-year research project *Network Resource Management Based on Language Model Multi-Agent Systems*.
+
+The project investigates whether a structured multi-agent LLM workflow — with one slice agent per service type (eMBB / URLLC / mMTC), a coordinator, and an explicit negotiation protocol — can match or improve upon traditional rule-based heuristics and a Deep Reinforcement Learning (DRL) baseline for inter-slice bandwidth allocation in a 5G network slicing simulator. Two research questions are addressed:
+
+- **RQ1**: How does the multi-agent LLM framework compare against fixed-ratio, threshold-based and PPO baselines on per-slice SLA satisfaction, total throughput, fairness, decision latency and token cost?
+- **RQ2**: Does the explicit negotiation protocol (Priority Arbitration vs.\ Proportional Compromise) provide measurable benefits over a single-shot coordinator allocation with no negotiation?
+
+The simulator is implemented on top of [Gymnasium](https://gymnasium.farama.org/), the LLM agents are orchestrated with [LangGraph](https://github.com/langchain-ai/langgraph) and [LangChain](https://github.com/langchain-ai/langchain), and the DRL baseline uses [Stable-Baselines3](https://stable-baselines3.readthedocs.io/) PPO.
+
+## Repository Layout
+
+```
+Final_Project/
+├── config.yaml                 # All simulation, reward, LLM and PPO hyperparameters
+├── pyproject.toml              # Python project metadata and dependencies (uv / pip)
+├── uv.lock                     # Locked dependency versions for reproducible installs
+├── run_all.py                  # Sequential one-click runner for the full experiment pipeline
+├── .env.example                # Template for OPENAI_API_KEY (copy to .env before running)
+├── src/                        # Core library code (importable as `src.*`)
+├── experiments/                # Experiment driver scripts (Exp1, Exp2, PPO training, aggregation)
+├── visualization/              # Plot-generation utilities for the paper figures
+└── results/                    # All experiment outputs (CSV, PNG, trained model)
+```
+
+The `docs/` and `paper/` directories are not part of the runnable codebase and are intentionally omitted from the description below.
+
+### `src/` — Core Library
+
+| Module | Contents |
+|--------|----------|
+| `src/environment/slicing_env.py` | `NetworkSlicingEnv` (Gymnasium): 15-dim observation, 3-dim continuous action, Poisson traffic, AR(1) CQI model, per-slice SLA evaluator and reward function. |
+| `src/agents/llm_client.py` | Thin wrapper around `langchain_openai.ChatOpenAI` with retry, timeout and JSON-output parsing. |
+| `src/agents/slice_agent.py` | Per-slice agent (eMBB / URLLC / mMTC) that proposes a bandwidth share with a natural-language justification. |
+| `src/agents/coordinator.py` | Coordinator agent that checks proposal compatibility and decides whether to trigger negotiation or finalise. |
+| `src/agents/single_agent.py` | Single-agent LLM baseline (M4) that produces the full allocation in one prompt. |
+| `src/agents/multi_agent_graph.py` | LangGraph `StateGraph` orchestrating slice agents, coordinator and negotiation node. |
+| `src/negotiation/protocol.py` | Two negotiation strategies: Priority Arbitration (PA) and Proportional Compromise (PC). |
+| `src/baselines/fixed_ratio.py` | M1: fixed 5:3:2 allocation. |
+| `src/baselines/threshold.py` | M2: rule-based dynamic adjustment triggered by SLA violation. |
+| `src/baselines/ppo_policy.py` | M3: PPO policy wrapper compatible with the same evaluation loop. |
+| `src/utils/metrics.py` | Per-slice SLA, weighted throughput, Jain's fairness, latency and token-counting helpers. |
+
+### `experiments/` — Experiment Drivers
+
+| Script | Purpose |
+|--------|---------|
+| `experiments/validate_env.py` | Sanity-check the simulation environment (state shape, reward range, deterministic seeding). |
+| `experiments/train_ppo.py` | Train the PPO baseline; saves the model to `results/models/ppo_model.zip`. |
+| `experiments/runner.py` | Shared evaluation loop, config loader and per-episode logging used by Exp1 and Exp2. |
+| `experiments/exp1_performance.py` | RQ1 driver: runs a single method (M1, M2, M3-PPO, M4, M5-PA, M5-PC) under both `steady` and `burst` scenarios with 5 seeds. Can be invoked per method to enable parallel execution across terminals. |
+| `experiments/exp2_negotiation.py` | RQ2 driver: runs the M5-NoNeg variant; M5-PA and M5-PC results are reused from Exp1. |
+| `experiments/aggregate_results.py` | Merges per-method CSV outputs into the consolidated tables consumed by the paper. |
+
+### `visualization/` — Figure Generation
+
+`visualization/plot_results.py` reads the consolidated CSVs in `results/data/` and produces all figures used in the report (per-slice SLA bars, burst-trend lines, performance overviews, fairness comparison, PPO training curve).
+
+### `results/` — Experiment Outputs
+
+```
+results/
+├── data/
+│   ├── per_method/             # Raw per-method per-seed step- and episode-level logs
+│   ├── exp1_steps.csv          # Concatenated step-level logs for Experiment 1
+│   ├── exp1_episodes.csv       # Episode-level summaries for Experiment 1
+│   ├── exp1_main_table.csv     # Aggregated mean ± std table (used in §4.2 of the report)
+│   ├── exp2_steps.csv          # Step-level logs for Experiment 2 (negotiation ablation)
+│   ├── exp2_episodes.csv       # Episode-level summaries for Experiment 2
+│   ├── exp2_comparison_table.csv  # Aggregated table for §4.3
+│   └── ppo_training_curve.csv  # Episode-reward trajectory of the PPO baseline
+├── figures/                    # PNG figures regenerated by `visualization/plot_results.py`
+└── models/
+    └── ppo_model.zip           # Trained Stable-Baselines3 PPO checkpoint
+```
+
+`config.yaml` centralises every numerical setting (bandwidth, arrival rates, CQI model parameters, reward weights, PPO hyperparameters, LLM temperature and max negotiation rounds), so all experiments are reproducible from a single source of truth.
+
 ## System Architecture Design
 
 ```mermaid
@@ -187,6 +266,7 @@ Default arrival rates: $\lambda_{\text{eMBB}} = 50$, $\lambda_{\text{URLLC}} = 3
 |----|--------|----------|-------------|
 | M1 | Fixed-Ratio | Rule-based | Fixed allocation (eMBB:URLLC:mMTC = 5:3:2) |
 | M2 | Threshold-based | Rule-based | Dynamic adjustment triggered by SLA violation |
+| M3 | PPO | Deep RL | Stable-Baselines3 PPO trained on the same environment |
 | M4 | Single-Agent LLM | Single-agent LLM | GPT-4o-mini + CoT, no multi-agent collaboration |
 | M5-PA | Multi-Agent (Priority Arbitration) | Multi-agent LLM | Slice agents + coordinator + priority-based negotiation |
 | M5-PC | Multi-Agent (Proportional Compromise) | Multi-agent LLM | Slice agents + coordinator + proportional negotiation |
@@ -194,19 +274,57 @@ Default arrival rates: $\lambda_{\text{eMBB}} = 50$, $\lambda_{\text{URLLC}} = 3
 
 ## Quick Start
 
+### 1. Install dependencies
+
+The project is managed with [`uv`](https://github.com/astral-sh/uv); a standard `pip install -e .` against `pyproject.toml` also works.
+
 ```bash
-# 1. Install dependencies
 uv sync
+```
 
-# 2. Configure API key
+### 2. Configure the API key
+
+```bash
 cp .env.example .env
-# Edit .env and fill in OPENAI_API_KEY
+# Edit .env and fill in OPENAI_API_KEY (only required for M4 / M5 variants)
+```
 
-# 3. Run environment validation
+### 3. Validate the environment
+
+```bash
 MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python experiments/validate_env.py
+```
 
-# 4. Run all experiments
+### 4. Run the full pipeline (sequential)
+
+```bash
 MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python run_all.py
 ```
 
-Results are saved to `results/data/` (CSV) and `results/figures/` (PNG).
+This trains PPO (if `results/models/ppo_model.zip` is missing), runs every method on both scenarios with 5 seeds, aggregates the CSVs and regenerates all figures.
+
+### 5. Recommended parallel workflow
+
+For faster turnaround, methods can be launched in separate terminals because each writes to its own `results/data/per_method/` directory:
+
+```bash
+# Terminal 0 (only needed once)
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.train_ppo
+
+# Terminals 1-6 (one method each, in parallel)
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp1_performance M1-Fixed
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp1_performance M2-Threshold
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp1_performance M3-PPO
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp1_performance M4-SingleLLM
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp1_performance M5-PA
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp1_performance M5-PC
+
+# Terminal 7 (negotiation ablation)
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.exp2_negotiation M5-NoNeg
+
+# After all methods finish: aggregate and plot
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m experiments.aggregate_results
+MPLCONFIGDIR=.mplcache PYTHONPATH=. uv run python -m visualization.plot_results
+```
+
+Final tables are saved as CSV in `results/data/`, figures in `results/figures/`, and the trained PPO checkpoint in `results/models/`.

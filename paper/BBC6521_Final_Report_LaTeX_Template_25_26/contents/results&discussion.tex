@@ -83,32 +83,32 @@ Table~\ref{table:exp1main} presents the mean and standard deviation of the key m
 \begin{table}[h]
   \centering
   \begin{spacing}{1.2}
-  \caption{Experiment~1: Core performance comparison (mean $\pm$ std over 5 seeds).}\vspace{0.7em}
+  \caption{Experiment~1: Core performance comparison (mean $\pm$ std over 5 seeds). The best value within each scenario is shown in bold (higher is better for SLA Avg, Throughput and Fairness; lower is better for Latency and Tokens; bandwidth utilisation is omitted as it is fixed by the demand profile).}\vspace{0.7em}
   \label{table:exp1main}
   \footnotesize
     \begin{tabular}{|p{1.6cm}|p{1.2cm}|p{1.5cm}|p{1.6cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.6cm}|}
     \hline
     \textbf{Method} & \textbf{Scenario} & \textbf{SLA Avg} & \textbf{Throughput (Mbps)} & \textbf{BW Util} & \textbf{Fairness} & \textbf{Latency (s)} & \textbf{Tokens/ep} \\
     \hline
-    M1-Fixed & burst & .612$\pm$.029 & 4769$\pm$218 & .760$\pm$.006 & .819$\pm$.067 & 0 & 0 \\
+    M1-Fixed & burst & \textbf{.612$\pm$.029} & 4769$\pm$218 & .760$\pm$.006 & .819$\pm$.067 & \textbf{0} & \textbf{0} \\
     \hline
-    M1-Fixed & steady & .617$\pm$.040 & 4617$\pm$254 & .538$\pm$.010 & .899$\pm$.072 & 0 & 0 \\
+    M1-Fixed & steady & \textbf{.617$\pm$.040} & 4617$\pm$254 & .538$\pm$.010 & .899$\pm$.072 & \textbf{0} & \textbf{0} \\
     \hline
-    M2-Thres & burst & .399$\pm$.027 & 4467$\pm$325 & .760$\pm$.006 & .923$\pm$.034 & 0 & 0 \\
+    M2-Thres & burst & .399$\pm$.027 & 4467$\pm$325 & .760$\pm$.006 & \textbf{.923$\pm$.034} & \textbf{0} & \textbf{0} \\
     \hline
-    M2-Thres & steady & .491$\pm$.020 & 4379$\pm$212 & .538$\pm$.010 & .956$\pm$.023 & 0 & 0 \\
+    M2-Thres & steady & .491$\pm$.020 & 4379$\pm$212 & .538$\pm$.010 & \textbf{.956$\pm$.023} & \textbf{0} & \textbf{0} \\
     \hline
-    M3-PPO & burst & .515$\pm$.027 & 4651$\pm$222 & .760$\pm$.006 & .890$\pm$.033 & $<$0.001 & 0 \\
+    M3-PPO & burst & .515$\pm$.027 & 4651$\pm$222 & .760$\pm$.006 & .890$\pm$.033 & $<$0.001 & \textbf{0} \\
     \hline
-    M3-PPO & steady & .499$\pm$.015 & 4350$\pm$262 & .538$\pm$.010 & .950$\pm$.035 & $<$0.001 & 0 \\
+    M3-PPO & steady & .499$\pm$.015 & 4350$\pm$262 & .538$\pm$.010 & .950$\pm$.035 & $<$0.001 & \textbf{0} \\
     \hline
     M4-Single & burst & .481$\pm$.037 & 5074$\pm$267 & .760$\pm$.006 & .645$\pm$.071 & 5.79$\pm$2.46 & 26244 \\
     \hline
     M4-Single & steady & .500$\pm$.036 & 4940$\pm$332 & .538$\pm$.010 & .726$\pm$.036 & 8.87$\pm$0.24 & 26124 \\
     \hline
-    M5-PA & burst & .389$\pm$.029 & 5549$\pm$365 & .760$\pm$.006 & .513$\pm$.060 & 6.65$\pm$1.58 & 124838 \\
+    M5-PA & burst & .389$\pm$.029 & \textbf{5549$\pm$365} & .760$\pm$.006 & .513$\pm$.060 & 6.65$\pm$1.58 & 124838 \\
     \hline
-    M5-PA & steady & .413$\pm$.022 & 5336$\pm$404 & .538$\pm$.010 & .613$\pm$.048 & 8.07$\pm$0.11 & 124938 \\
+    M5-PA & steady & .413$\pm$.022 & \textbf{5336$\pm$404} & .538$\pm$.010 & .613$\pm$.048 & 8.07$\pm$0.11 & 124938 \\
     \hline
     M5-PC & burst & .606$\pm$.021 & 4650$\pm$176 & .760$\pm$.006 & .794$\pm$.055 & 6.63$\pm$1.48 & 125348 \\
     \hline
@@ -168,24 +168,24 @@ Table~\ref{table:exp2} compares the three multi-agent variants: M5-PA (Priority 
 \begin{table}[h]
   \centering
   \begin{spacing}{1.2}
-  \caption{Experiment~2: Multi-agent variant comparison (mean $\pm$ std over 5 seeds).}\vspace{0.7em}
+  \caption{Experiment~2: Multi-agent variant comparison (mean $\pm$ std over 5 seeds). The best value within each scenario is shown in bold, using the same convention as Table~\ref{table:exp1main}.}\vspace{0.7em}
   \label{table:exp2}
   \footnotesize
     \begin{tabular}{|p{1.8cm}|p{1.2cm}|p{1.5cm}|p{1.6cm}|p{1.5cm}|p{1.5cm}|p{1.5cm}|p{1.6cm}|}
     \hline
     \textbf{Method} & \textbf{Scenario} & \textbf{SLA Avg} & \textbf{Throughput (Mbps)} & \textbf{BW Util} & \textbf{Fairness} & \textbf{Latency (s)} & \textbf{Tokens/ep} \\
     \hline
-    M5-NoNeg & burst & .481$\pm$.046 & 4855$\pm$252 & .760$\pm$.006 & .780$\pm$.104 & 6.51$\pm$1.47 & 125398 \\
+    M5-NoNeg & burst & .481$\pm$.046 & 4855$\pm$252 & .760$\pm$.006 & .780$\pm$.104 & \textbf{6.51$\pm$1.47} & 125398 \\
     \hline
     M5-NoNeg & steady & .463$\pm$.079 & 4840$\pm$320 & .538$\pm$.010 & .837$\pm$.021 & 8.14$\pm$0.38 & 125512 \\
     \hline
-    M5-PA & burst & .389$\pm$.029 & 5549$\pm$365 & .760$\pm$.006 & .513$\pm$.060 & 6.65$\pm$1.58 & 124838 \\
+    M5-PA & burst & .389$\pm$.029 & \textbf{5549$\pm$365} & .760$\pm$.006 & .513$\pm$.060 & 6.65$\pm$1.58 & \textbf{124838} \\
     \hline
-    M5-PA & steady & .413$\pm$.022 & 5336$\pm$404 & .538$\pm$.010 & .613$\pm$.048 & 8.07$\pm$0.11 & 124938 \\
+    M5-PA & steady & .413$\pm$.022 & \textbf{5336$\pm$404} & .538$\pm$.010 & .613$\pm$.048 & 8.07$\pm$0.11 & \textbf{124938} \\
     \hline
-    M5-PC & burst & .606$\pm$.021 & 4650$\pm$176 & .760$\pm$.006 & .794$\pm$.055 & 6.63$\pm$1.48 & 125348 \\
+    M5-PC & burst & \textbf{.606$\pm$.021} & 4650$\pm$176 & .760$\pm$.006 & \textbf{.794$\pm$.055} & 6.63$\pm$1.48 & 125348 \\
     \hline
-    M5-PC & steady & .585$\pm$.037 & 4635$\pm$232 & .538$\pm$.010 & .865$\pm$.065 & 7.94$\pm$0.19 & 125244 \\
+    M5-PC & steady & \textbf{.585$\pm$.037} & 4635$\pm$232 & .538$\pm$.010 & \textbf{.865$\pm$.065} & \textbf{7.94$\pm$0.19} & 125244 \\
     \hline
     \end{tabular}
   \end{spacing}

@@ -52,13 +52,13 @@
 \contentsline {subsection}{\numberline {4.2}Core Performance Comparison (Experiment 1)}{25}{subsection.4.2}%
 \contentsline {subsubsection}{\numberline {4.2.1}Overall Performance}{25}{subsubsection.4.2.1}%
 \contentsline {subsubsection}{\numberline {4.2.2}Per-Slice SLA Satisfaction}{25}{subsubsection.4.2.2}%
-\contentsline {subsubsection}{\numberline {4.2.3}Burst Scenario Adaptation}{27}{subsubsection.4.2.3}%
+\contentsline {subsubsection}{\numberline {4.2.3}Burst Scenario Adaptation}{26}{subsubsection.4.2.3}%
 \contentsline {subsubsection}{\numberline {4.2.4}Performance Overview}{27}{subsubsection.4.2.4}%
 \contentsline {subsection}{\numberline {4.3}Negotiation Mechanism Validation (Experiment 2)}{28}{subsection.4.3}%
 \contentsline {subsubsection}{\numberline {4.3.1}Comparison of Multi-Agent Variants}{28}{subsubsection.4.3.1}%
-\contentsline {subsubsection}{\numberline {4.3.2}Fairness Comparison}{28}{subsubsection.4.3.2}%
+\contentsline {subsubsection}{\numberline {4.3.2}Fairness Comparison}{29}{subsubsection.4.3.2}%
 \contentsline {subsubsection}{\numberline {4.3.3}Per-Slice SLA Analysis}{29}{subsubsection.4.3.3}%
-\contentsline {subsubsection}{\numberline {4.3.4}Performance Overview}{29}{subsubsection.4.3.4}%
+\contentsline {subsubsection}{\numberline {4.3.4}Performance Overview}{30}{subsubsection.4.3.4}%
 \contentsline {subsection}{\numberline {4.4}Result Analysis}{30}{subsection.4.4}%
 \contentsline {subsubsection}{\numberline {4.4.1}Addressing RQ1: Multi-Agent LLM vs.\ Baselines}{30}{subsubsection.4.4.1}%
 \contentsline {subsubsection}{\numberline {4.4.2}Addressing RQ2: Value of the Negotiation Mechanism}{31}{subsubsection.4.4.2}%
@@ -69,16 +69,16 @@
 \contentsline {subsection}{\numberline {5.2}Reflection}{34}{subsection.5.2}%
 \contentsline {subsection}{\numberline {5.3}Further Work}{35}{subsection.5.3}%
 \contentsline {section}{\textit {References}}{37}{subsection.5.3}%
-\contentsline {section}{\textit {Acknowledgment}}{39}{section*.16}%
-\contentsline {section}{\textit {Appendices}}{40}{section*.17}%
-\contentsline {subsection}{Disclaimer}{40}{section*.18}%
-\contentsline {subsection}{Acknowledgement of using Generative AI}{41}{section*.19}%
-\contentsline {subsection}{Project specification}{42}{section*.20}%
-\contentsline {subsection}{Early-term progress report}{50}{section*.21}%
-\contentsline {subsection}{Mid-term progress report}{55}{section*.22}%
-\contentsline {subsection}{Supervision log}{66}{section*.23}%
-\contentsline {subsection}{Additional appendices}{68}{section*.24}%
-\contentsline {subsection}{Prompt Templates for Each Agent Role}{68}{section*.25}%
-\contentsline {subsection}{Agent Message Format (JSON Schema)}{71}{section*.26}%
-\contentsline {subsection}{DRL Training Convergence Curves}{73}{section*.27}%
-\contentsline {section}{\textit {Risk and Environmental Impact Assessment}}{74}{section*.28}%
+\contentsline {section}{\textit {Acknowledgment}}{40}{section*.16}%
+\contentsline {section}{\textit {Appendices}}{41}{section*.17}%
+\contentsline {subsection}{Disclaimer}{41}{section*.18}%
+\contentsline {subsection}{Acknowledgement of using Generative AI}{42}{section*.19}%
+\contentsline {subsection}{Project specification}{43}{section*.20}%
+\contentsline {subsection}{Early-term progress report}{51}{section*.21}%
+\contentsline {subsection}{Mid-term progress report}{56}{section*.22}%
+\contentsline {subsection}{Supervision log}{67}{section*.23}%
+\contentsline {subsection}{Additional appendices}{69}{section*.24}%
+\contentsline {subsection}{Prompt Templates for Each Agent Role}{69}{section*.25}%
+\contentsline {subsection}{Agent Message Format (JSON Schema)}{72}{section*.26}%
+\contentsline {subsection}{DRL Training Convergence Curves}{74}{section*.27}%
+\contentsline {section}{\textit {Risk and Environmental Impact Assessment}}{75}{section*.28}%

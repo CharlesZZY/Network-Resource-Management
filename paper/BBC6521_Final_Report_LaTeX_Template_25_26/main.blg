@@ -1,82 +1,57 @@
 This is BibTeX, Version 0.99d (TeX Live 2024)
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: main.aux
-The style file: vancouver.bst
+The style file: IEEEtran.bst
 A level-1 auxiliary file: cover.aux
-Reallocated glb_str_ptr (elt_size=4) to 20 items from 10.
-Reallocated global_strs (elt_size=200001) to 20 items from 10.
-Reallocated glb_str_end (elt_size=4) to 20 items from 10.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
 Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+Reallocated singl_function (elt_size=4) to 100 items from 50.
 Database file #1: reference.bib
-Warning--empty author and editor in tong2025wirelessagent
-Warning--missing publisher in tong2025wirelessagent
-Warning--empty author and editor in hong2023metagpt
-Warning--missing publisher in hong2023metagpt
-Warning--empty author and editor in qian2023chatdev
-Warning--missing publisher in qian2023chatdev
-Warning--empty author and editor in brockman2016gym
-Warning--missing publisher in brockman2016gym
-Warning--empty author and editor in lotfi2025oranguide
-Warning--missing publisher in lotfi2025oranguide
-Warning--empty author and editor in qu2025dualloop
-Warning--missing publisher in qu2025dualloop
-Warning--empty pages in lewis2020rag
-Warning--empty pages in wu2024netllm
-Warning--empty author and editor in chergui2025collective
-Warning--missing publisher in chergui2025collective
-Warning--empty author and editor in wu2023autogen
-Warning--missing publisher in wu2023autogen
-Warning--empty author and editor in li2023camel
-Warning--missing publisher in li2023camel
-Warning--empty author and editor in wang2023agentsurvey
-Warning--missing publisher in wang2023agentsurvey
-Warning--empty author and editor in wei2022cot
-Warning--missing publisher in wei2022cot
-Warning--empty author and editor in langchain2024langgraph
-Warning--missing publisher in langchain2024langgraph
-Warning--empty author and editor in schulman2017ppo
-Warning--missing publisher in schulman2017ppo
-Warning--empty author and editor in raffin2021sb3
-Warning--missing publisher in raffin2021sb3
+-- IEEEtran.bst version 1.14 (2015/08/26) by Michael Shell.
+-- http://www.michaelshell.org/tex/ieeetran/bibtex/
+-- See the "IEEEtran_bst_HOWTO.pdf" manual for usage information.
+
+Done.
 You've used 26 entries,
-            3507 wiz_defined-function locations,
-            836 strings with 9497 characters,
-and the built_in function-call counts, 31640 in all, are:
-= -- 3612
-> -- 361
-< -- 124
-+ -- 232
-- -- 81
-* -- 2280
-:= -- 3500
-add.period$ -- 88
+            4087 wiz_defined-function locations,
+            964 strings with 13976 characters,
+and the built_in function-call counts, 20272 in all, are:
+= -- 1488
+> -- 824
+< -- 95
++ -- 421
+- -- 188
+* -- 999
+:= -- 2930
+add.period$ -- 53
 call.type$ -- 26
-change.case$ -- 18
-chr.to.int$ -- 280
-cite$ -- 56
-duplicate$ -- 2943
-empty$ -- 3015
-format.name$ -- 101
-if$ -- 7449
+change.case$ -- 40
+chr.to.int$ -- 213
+cite$ -- 26
+duplicate$ -- 1467
+empty$ -- 1548
+format.name$ -- 207
+if$ -- 4663
 int.to.chr$ -- 0
 int.to.str$ -- 26
-missing$ -- 242
-newline$ -- 133
+missing$ -- 358
+newline$ -- 101
 num.names$ -- 26
-pop$ -- 624
+pop$ -- 921
 preamble$ -- 1
 purify$ -- 0
-quote$ -- 0
-skip$ -- 498
+quote$ -- 2
+skip$ -- 1467
 stack$ -- 0
-substring$ -- 4773
-swap$ -- 568
-text.length$ -- 43
+substring$ -- 572
+swap$ -- 1196
+text.length$ -- 24
 text.prefix$ -- 0
-top$ -- 0
-type$ -- 0
-warning$ -- 30
-while$ -- 199
+top$ -- 5
+type$ -- 26
+warning$ -- 0
+while$ -- 63
 width$ -- 28
-write$ -- 283
-(There were 30 warnings)
+write$ -- 268
